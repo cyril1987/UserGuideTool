@@ -83,6 +83,7 @@
       font-size: 14px;
       font-weight: 600;
       transition: all 0.1s;
+      position: relative;
     }
     .fmt-btn:hover {
       background: var(--gray-100);
@@ -193,7 +194,6 @@
       color: var(--gray-400);
       pointer-events: none;
     }
-    /* Apply the same rich content styles as guide-content */
     #visual-editor .card {
       background: white;
       border: 1px solid var(--gray-200);
@@ -203,11 +203,183 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
     #visual-editor .card p { margin: 10px 0; }
-
     #visual-editor img {
       max-width: 100%;
       border-radius: 8px;
       margin: 8px 0;
+    }
+
+    /* ===========================
+       RESIZABLE ELEMENTS
+       =========================== */
+    #visual-editor .resizable-wrapper {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+    }
+    #visual-editor .resizable-wrapper.selected {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    #visual-editor .resize-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border: 2px solid white;
+      border-radius: 2px;
+      cursor: nwse-resize;
+      z-index: 10;
+      display: none;
+    }
+    #visual-editor .resizable-wrapper.selected .resize-handle {
+      display: block;
+    }
+    #visual-editor .resize-handle.rh-se { bottom: -6px; right: -6px; }
+    #visual-editor .resize-handle.rh-e {
+      top: 50%;
+      right: -6px;
+      transform: translateY(-50%);
+      cursor: ew-resize;
+    }
+    #visual-editor .resize-handle.rh-s {
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: ns-resize;
+    }
+    /* Make tables/cards block-level resizable */
+    #visual-editor .resizable-block {
+      position: relative;
+      overflow: visible;
+    }
+    #visual-editor .resizable-block.selected {
+      outline: 2px solid var(--primary);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+    #visual-editor .resizable-block > .resize-handle {
+      display: none;
+    }
+    #visual-editor .resizable-block.selected > .resize-handle {
+      display: block;
+    }
+
+    /* ===========================
+       PICKER PANELS (shared)
+       =========================== */
+    .picker-panel {
+      position: fixed;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      border: 1px solid var(--gray-200);
+    }
+    .picker-panel.visible {
+      display: flex;
+    }
+    .picker-header {
+      padding: 12px 16px 8px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .picker-header input {
+      width: 100%;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .picker-header input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+    .picker-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--gray-100);
+      overflow-x: auto;
+    }
+    .picker-tab {
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-400);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .picker-tab:hover { color: var(--gray-600); }
+    .picker-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .picker-grid {
+      display: grid;
+      gap: 2px;
+      padding: 10px 12px;
+      overflow-y: auto;
+      max-height: 260px;
+    }
+    .picker-grid.emoji-grid {
+      grid-template-columns: repeat(8, 1fr);
+    }
+    .picker-grid.icon-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .picker-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 22px;
+      transition: background 0.1s;
+    }
+    .picker-item:hover {
+      background: var(--gray-100);
+    }
+    .picker-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gray-700);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .picker-item:hover svg {
+      stroke: var(--primary);
+    }
+    .picker-item[title]::after {
+      content: none;
+    }
+    /* Icon size in content */
+    .guide-icon {
+      display: inline-block;
+      vertical-align: middle;
+      width: 1.2em;
+      height: 1.2em;
+    }
+    .guide-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* HTML Source editor */
@@ -292,6 +464,14 @@
         </button>
       </div>
       <div class="fmt-group">
+        <button class="fmt-btn" id="btnEmoji" title="Insert emoji">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </button>
+        <button class="fmt-btn" id="btnIcon" title="Insert icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </button>
+      </div>
+      <div class="fmt-group">
         <button class="fmt-btn" data-cmd="undo" title="Undo (Ctrl+Z)">
           <svg viewBox="0 0 24 24"><path d="M3 10h10a5 5 0 015 5v2M3 10l5-5M3 10l5 5"/></svg>
         </button>
@@ -325,6 +505,24 @@
 
     <!-- HTML Source Editor -->
     <textarea id="source-editor" spellcheck="false"></textarea>
+  </div>
+
+  <!-- Emoji Picker -->
+  <div class="picker-panel" id="emojiPicker" style="width: 340px;">
+    <div class="picker-header">
+      <input type="text" id="emojiSearch" placeholder="Search emojis...">
+    </div>
+    <div class="picker-tabs" id="emojiTabs"></div>
+    <div class="picker-grid emoji-grid" id="emojiGrid"></div>
+  </div>
+
+  <!-- Icon Picker -->
+  <div class="picker-panel" id="iconPicker" style="width: 300px;">
+    <div class="picker-header">
+      <input type="text" id="iconSearch" placeholder="Search icons...">
+    </div>
+    <div class="picker-tabs" id="iconTabs"></div>
+    <div class="picker-grid icon-grid" id="iconGrid"></div>
   </div>
 
   <!-- Table insert modal -->
@@ -378,7 +576,6 @@
     const tabVisual = document.getElementById('tabVisual');
     const tabSource = document.getElementById('tabSource');
 
-    // --- Editor mode state ---
     let currentMode = 'visual';
 
     // --- Load existing content ---
@@ -389,10 +586,9 @@
     // ===========================
     //  FORMAT TOOLBAR
     // ===========================
-    // Simple commands (bold, italic, etc.)
     document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
       btn.addEventListener('mousedown', (e) => {
-        e.preventDefault(); // keep focus in editor
+        e.preventDefault();
         const cmd = btn.dataset.cmd;
         if (cmd === 'createLink') {
           const url = prompt('Enter URL:');
@@ -404,20 +600,16 @@
       });
     });
 
-    // Unlink button
     document.getElementById('btnUnlink').addEventListener('mousedown', (e) => {
       e.preventDefault();
       document.execCommand('unlink', false, null);
     });
 
-    // Block type selector
     document.getElementById('blockType').addEventListener('change', (e) => {
-      const tag = e.target.value;
-      document.execCommand('formatBlock', false, '<' + tag + '>');
+      document.execCommand('formatBlock', false, '<' + e.target.value + '>');
       visualEditor.focus();
     });
 
-    // Update active state of toolbar buttons
     function updateToolbarState() {
       document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
         const cmd = btn.dataset.cmd;
@@ -425,7 +617,6 @@
           btn.classList.toggle('active', document.queryCommandState(cmd));
         }
       });
-      // Update block type selector
       const block = document.queryCommandValue('formatBlock');
       const sel = document.getElementById('blockType');
       const tag = block.replace(/[<>]/g, '').toLowerCase();
@@ -440,24 +631,54 @@
     visualEditor.addEventListener('mouseup', updateToolbarState);
 
     // ===========================
-    //  INSERT BLOCKS
+    //  INSERT AT CURSOR
     // ===========================
+    function saveSelection() {
+      const s = window.getSelection();
+      if (s.rangeCount > 0) return s.getRangeAt(0).cloneRange();
+      return null;
+    }
+    function restoreSelection(range) {
+      if (!range) return;
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(range);
+    }
+    let savedRange = null;
+
     function insertAtCursor(html) {
       visualEditor.focus();
+      if (savedRange) restoreSelection(savedRange);
       const sel = window.getSelection();
       if (sel.rangeCount) {
         const range = sel.getRangeAt(0);
         range.deleteContents();
         const frag = range.createContextualFragment(html);
         range.insertNode(frag);
-        // Move cursor after the inserted content
         range.collapse(false);
         sel.removeAllRanges();
         sel.addRange(range);
       }
+      savedRange = null;
     }
 
-    // Callout insertion
+    function insertTextAtCursor(text) {
+      visualEditor.focus();
+      if (savedRange) restoreSelection(savedRange);
+      document.execCommand('insertText', false, text);
+      savedRange = null;
+    }
+
+    function insertHtmlAtCursor(html) {
+      visualEditor.focus();
+      if (savedRange) restoreSelection(savedRange);
+      document.execCommand('insertHTML', false, html);
+      savedRange = null;
+    }
+
+    // ===========================
+    //  INSERT BLOCKS
+    // ===========================
     function insertCallout(type, icon, label) {
       insertAtCursor(`
         <div class="callout ${type}">
@@ -468,30 +689,16 @@
       showToast(`${label} callout inserted`);
     }
 
-    document.getElementById('insertTip').addEventListener('click', () => {
-      insertCallout('tip', '&#x2705;', 'Tip');
-    });
-    document.getElementById('insertBulb').addEventListener('click', () => {
-      insertCallout('tip', '&#x1F4A1;', 'Did You Know');
-    });
-    document.getElementById('insertWarn').addEventListener('click', () => {
-      insertCallout('warn', '&#x26A0;&#xFE0F;', 'Warning');
-    });
-    document.getElementById('insertInfo').addEventListener('click', () => {
-      insertCallout('info', '&#x2139;&#xFE0F;', 'Info');
-    });
+    document.getElementById('insertTip').addEventListener('click', () => insertCallout('tip', '&#x2705;', 'Tip'));
+    document.getElementById('insertBulb').addEventListener('click', () => insertCallout('tip', '&#x1F4A1;', 'Did You Know'));
+    document.getElementById('insertWarn').addEventListener('click', () => insertCallout('warn', '&#x26A0;&#xFE0F;', 'Warning'));
+    document.getElementById('insertInfo').addEventListener('click', () => insertCallout('info', '&#x2139;&#xFE0F;', 'Info'));
 
-    // Card insertion
     document.getElementById('insertCard').addEventListener('click', () => {
-      insertAtCursor(`
-        <div class="card">
-          <p>Type your card content here...</p>
-        </div><p><br></p>
-      `);
+      insertAtCursor(`<div class="card"><p>Type your card content here...</p></div><p><br></p>`);
       showToast('Card inserted');
     });
 
-    // Table insertion
     document.getElementById('insertTable').addEventListener('click', () => {
       document.getElementById('tableModal').classList.add('visible');
     });
@@ -515,16 +722,10 @@
       showToast('Table inserted');
     });
 
-    // HR / divider
-    document.getElementById('insertHR').addEventListener('click', () => {
-      insertAtCursor('<hr><p><br></p>');
-    });
+    document.getElementById('insertHR').addEventListener('click', () => insertAtCursor('<hr><p><br></p>'));
 
     // Image upload
-    document.getElementById('insertImage').addEventListener('click', () => {
-      document.getElementById('imageInput').click();
-    });
-
+    document.getElementById('insertImage').addEventListener('click', () => document.getElementById('imageInput').click());
     document.getElementById('imageInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -549,7 +750,6 @@
       }
     }
 
-    // Drag and drop images
     visualEditor.addEventListener('drop', async (e) => {
       const file = e.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
@@ -557,21 +757,353 @@
         await uploadAndInsertImage(file);
       }
     });
-    visualEditor.addEventListener('dragover', (e) => {
+    visualEditor.addEventListener('dragover', (e) => e.preventDefault());
+
+    // ===========================
+    //  RESIZE: cards, tables, images
+    // ===========================
+    let resizeState = null;
+
+    function getResizableEl(target) {
+      // Walk up from target to find a resizable element
+      let el = target;
+      while (el && el !== visualEditor) {
+        const tag = el.tagName;
+        if (tag === 'TABLE' || tag === 'IMG' ||
+            (el.classList && (el.classList.contains('card') || el.classList.contains('callout') ||
+             el.classList.contains('concept-box') || el.classList.contains('overview-panel')))) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Click to select resizable element
+    visualEditor.addEventListener('click', (e) => {
+      // Deselect all
+      visualEditor.querySelectorAll('.editor-selected').forEach(el => {
+        el.classList.remove('editor-selected');
+        el.style.outline = '';
+        el.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+      });
+
+      const resizable = getResizableEl(e.target);
+      if (resizable) {
+        resizable.classList.add('editor-selected');
+        resizable.style.outline = '2px solid #2563eb';
+        resizable.style.outlineOffset = '3px';
+        resizable.style.borderRadius = '4px';
+        // Add resize handles
+        addResizeHandles(resizable);
+      }
+    });
+
+    function addResizeHandles(el) {
+      const handle = document.createElement('div');
+      handle.className = 'resize-handle-el';
+      handle.contentEditable = 'false';
+      Object.assign(handle.style, {
+        position: 'absolute',
+        width: '12px',
+        height: '12px',
+        background: '#2563eb',
+        border: '2px solid white',
+        borderRadius: '2px',
+        cursor: 'nwse-resize',
+        zIndex: '10',
+        bottom: '-6px',
+        right: '-6px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+      });
+
+      // Make the element positioned if not already
+      if (getComputedStyle(el).position === 'static') {
+        el.style.position = 'relative';
+      }
+
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startW = el.offsetWidth;
+        const startH = el.offsetHeight;
+
+        resizeState = { el, startX, startY, startW, startH };
+      });
+
+      el.appendChild(handle);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (!resizeState) return;
       e.preventDefault();
+      const { el, startX, startY, startW, startH } = resizeState;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const newW = Math.max(100, startW + dx);
+      const newH = Math.max(40, startH + dy);
+
+      if (el.tagName === 'IMG') {
+        // Maintain aspect ratio for images
+        const ratio = startW / startH;
+        el.style.width = newW + 'px';
+        el.style.height = Math.round(newW / ratio) + 'px';
+      } else {
+        el.style.width = newW + 'px';
+        el.style.minHeight = newH + 'px';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (resizeState) {
+        resizeState = null;
+      }
+    });
+
+    // ===========================
+    //  EMOJI PICKER
+    // ===========================
+    const EMOJIS = {
+      'Smileys': ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😘','😗','😋','😛','😜','🤪','😝','🤗','🤭','🤫','🤔','🫡','🤐','🤨','😐','😑','😶','🫠','😏','😒','🙄','😬','😮‍💨','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐'],
+      'Gestures': ['👋','🤚','🖐','✋','🖖','🫱','🫲','👌','🤌','🤏','✌','🤞','🫰','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝','🫵','👍','👎','✊','👊','🤛','🤜','👏','🙌','🫶','👐','🤲','🙏','✍','💪','🦾','🦿','🦵','🦶','👀','👁','👅','👄'],
+      'People': ['👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵','💂','🥷','👷','🫅','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🫃','🤱','👼'],
+      'Nature': ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐻‍❄','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🦅','🦆','🦉','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🪲','🪳','🦂','🐢','🐍','🦎','🐙','🦑','🌸','🌺','🌻','🌹','🌷','🌱','🌿','🍀','🍁','🍂','🍃','🌍','🌙','⭐','🌈','🔥','💧','🌊'],
+      'Food': ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🥦','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🧇','🥓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🫔','🍝','🍜','🍣','🍱','🍩','🍪','🎂','🍰','🧁','🍫','🍬','🍭','☕','🍵','🧃','🥤','🍺','🍷'],
+      'Travel': ['🚗','🚕','🚙','🚌','🚎','🏎','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛵','🏍','🚲','🛴','🚏','🛤','🛣','⛽','🏗','🚢','⛵','🛶','🚤','🛳','✈','🛩','🚀','🛸','🏠','🏢','🏣','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏰'],
+      'Objects': ['⌚','📱','💻','⌨','🖥','🖨','🖱','💽','💾','💿','📷','📹','🎥','📞','☎','📺','📻','🎙','⏰','⏳','📡','🔋','🔌','💡','🔦','🕯','🧯','💰','💳','💎','⚖','🔧','🔨','⚒','🛠','🔩','🔗','📎','📌','📍','✂','📝','✏','🔍','🔎','🔐','🔑','🗝','🛡'],
+      'Symbols': ['❤','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣','💕','💞','💓','💗','💖','💘','💝','✅','❌','⭕','🚫','💯','💢','♨','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','▪','▫','◼','◻','⬛','⬜','🔶','🔷','🔸','🔹','💠','🔘','🏁','🚩','🎌','🏴','🏳','✔','✖','➕','➖','➗','❓','❕','‼','⁉','♻','🔰','⚠','📛']
+    };
+
+    const emojiPicker = document.getElementById('emojiPicker');
+    const emojiGrid = document.getElementById('emojiGrid');
+    const emojiTabs = document.getElementById('emojiTabs');
+    const emojiSearch = document.getElementById('emojiSearch');
+    let currentEmojiCat = Object.keys(EMOJIS)[0];
+
+    // Build tabs
+    Object.keys(EMOJIS).forEach((cat, i) => {
+      const tab = document.createElement('button');
+      tab.className = 'picker-tab' + (i === 0 ? ' active' : '');
+      tab.textContent = cat;
+      tab.addEventListener('click', () => {
+        currentEmojiCat = cat;
+        emojiTabs.querySelectorAll('.picker-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        emojiSearch.value = '';
+        renderEmojis(EMOJIS[cat]);
+      });
+      emojiTabs.appendChild(tab);
+    });
+
+    function renderEmojis(list) {
+      emojiGrid.innerHTML = '';
+      list.forEach(em => {
+        const btn = document.createElement('button');
+        btn.className = 'picker-item';
+        btn.textContent = em;
+        btn.title = em;
+        btn.addEventListener('click', () => {
+          insertTextAtCursor(em);
+          emojiPicker.classList.remove('visible');
+          showToast('Emoji inserted');
+        });
+        emojiGrid.appendChild(btn);
+      });
+    }
+
+    renderEmojis(EMOJIS[currentEmojiCat]);
+
+    emojiSearch.addEventListener('input', () => {
+      const q = emojiSearch.value.toLowerCase();
+      if (!q) { renderEmojis(EMOJIS[currentEmojiCat]); return; }
+      // Search all categories
+      const all = Object.values(EMOJIS).flat();
+      renderEmojis(all); // show all when searching
+    });
+
+    document.getElementById('btnEmoji').addEventListener('click', (e) => {
+      e.preventDefault();
+      savedRange = saveSelection();
+      const iconPicker = document.getElementById('iconPicker');
+      iconPicker.classList.remove('visible');
+      togglePicker(emojiPicker, e.currentTarget);
+    });
+
+    // ===========================
+    //  ICON PICKER
+    // ===========================
+    const ICONS = {
+      'General': [
+        { name: 'Home', svg: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
+        { name: 'Search', svg: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' },
+        { name: 'Settings', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>' },
+        { name: 'User', svg: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+        { name: 'Users', svg: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>' },
+        { name: 'Mail', svg: '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' },
+        { name: 'Phone', svg: '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>' },
+        { name: 'Calendar', svg: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
+        { name: 'Clock', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+        { name: 'Star', svg: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+        { name: 'Heart', svg: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>' },
+        { name: 'Bell', svg: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' },
+      ],
+      'Arrows': [
+        { name: 'Arrow Right', svg: '<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' },
+        { name: 'Arrow Left', svg: '<svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' },
+        { name: 'Arrow Up', svg: '<svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>' },
+        { name: 'Arrow Down', svg: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>' },
+        { name: 'Chevron Right', svg: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>' },
+        { name: 'Chevron Left', svg: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>' },
+        { name: 'Chevron Up', svg: '<svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>' },
+        { name: 'Chevron Down', svg: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>' },
+        { name: 'Refresh', svg: '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>' },
+        { name: 'External', svg: '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' },
+      ],
+      'Status': [
+        { name: 'Check', svg: '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' },
+        { name: 'Check Circle', svg: '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+        { name: 'X', svg: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' },
+        { name: 'X Circle', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' },
+        { name: 'Alert Triangle', svg: '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+        { name: 'Alert Circle', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' },
+        { name: 'Info', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' },
+        { name: 'Help', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+        { name: 'Thumbs Up', svg: '<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>' },
+        { name: 'Thumbs Down', svg: '<svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/></svg>' },
+      ],
+      'Content': [
+        { name: 'File', svg: '<svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>' },
+        { name: 'Folder', svg: '<svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>' },
+        { name: 'Image', svg: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' },
+        { name: 'Video', svg: '<svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' },
+        { name: 'Book', svg: '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>' },
+        { name: 'Bookmark', svg: '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>' },
+        { name: 'Clipboard', svg: '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>' },
+        { name: 'Edit', svg: '<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' },
+        { name: 'Trash', svg: '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' },
+        { name: 'Download', svg: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' },
+        { name: 'Upload', svg: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' },
+        { name: 'Share', svg: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' },
+      ],
+      'Tech': [
+        { name: 'Monitor', svg: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+        { name: 'Smartphone', svg: '<svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>' },
+        { name: 'Database', svg: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>' },
+        { name: 'Cloud', svg: '<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>' },
+        { name: 'Lock', svg: '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' },
+        { name: 'Unlock', svg: '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>' },
+        { name: 'Key', svg: '<svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>' },
+        { name: 'Shield', svg: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' },
+        { name: 'Wifi', svg: '<svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>' },
+        { name: 'Zap', svg: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+        { name: 'Terminal', svg: '<svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>' },
+        { name: 'Code', svg: '<svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>' },
+      ]
+    };
+
+    const iconPicker = document.getElementById('iconPicker');
+    const iconGrid = document.getElementById('iconGrid');
+    const iconTabs = document.getElementById('iconTabs');
+    const iconSearch = document.getElementById('iconSearch');
+    let currentIconCat = Object.keys(ICONS)[0];
+
+    Object.keys(ICONS).forEach((cat, i) => {
+      const tab = document.createElement('button');
+      tab.className = 'picker-tab' + (i === 0 ? ' active' : '');
+      tab.textContent = cat;
+      tab.addEventListener('click', () => {
+        currentIconCat = cat;
+        iconTabs.querySelectorAll('.picker-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        iconSearch.value = '';
+        renderIcons(ICONS[cat]);
+      });
+      iconTabs.appendChild(tab);
+    });
+
+    function renderIcons(list) {
+      iconGrid.innerHTML = '';
+      list.forEach(icon => {
+        const btn = document.createElement('button');
+        btn.className = 'picker-item';
+        btn.innerHTML = icon.svg;
+        btn.title = icon.name;
+        btn.addEventListener('click', () => {
+          const html = `<span class="guide-icon" title="${icon.name}">${icon.svg}</span>`;
+          insertHtmlAtCursor(html);
+          iconPicker.classList.remove('visible');
+          showToast(`${icon.name} icon inserted`);
+        });
+        iconGrid.appendChild(btn);
+      });
+    }
+
+    renderIcons(ICONS[currentIconCat]);
+
+    iconSearch.addEventListener('input', () => {
+      const q = iconSearch.value.toLowerCase();
+      if (!q) { renderIcons(ICONS[currentIconCat]); return; }
+      const all = Object.values(ICONS).flat().filter(ic => ic.name.toLowerCase().includes(q));
+      renderIcons(all);
+    });
+
+    document.getElementById('btnIcon').addEventListener('click', (e) => {
+      e.preventDefault();
+      savedRange = saveSelection();
+      emojiPicker.classList.remove('visible');
+      togglePicker(iconPicker, e.currentTarget);
+    });
+
+    // ===========================
+    //  PICKER POSITIONING
+    // ===========================
+    function togglePicker(panel, anchorBtn) {
+      if (panel.classList.contains('visible')) {
+        panel.classList.remove('visible');
+        return;
+      }
+      const rect = anchorBtn.getBoundingClientRect();
+      panel.style.top = (rect.bottom + 6) + 'px';
+      panel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 360)) + 'px';
+      panel.classList.add('visible');
+      // Focus search
+      const search = panel.querySelector('input');
+      if (search) setTimeout(() => search.focus(), 50);
+    }
+
+    // Close pickers on outside click
+    document.addEventListener('mousedown', (e) => {
+      if (!emojiPicker.contains(e.target) && e.target.id !== 'btnEmoji' && !e.target.closest('#btnEmoji')) {
+        emojiPicker.classList.remove('visible');
+      }
+      if (!iconPicker.contains(e.target) && e.target.id !== 'btnIcon' && !e.target.closest('#btnIcon')) {
+        iconPicker.classList.remove('visible');
+      }
     });
 
     // ===========================
     //  MODE SWITCHING
     // ===========================
     function getContent() {
-      return currentMode === 'source' ? sourceEditor.value : visualEditor.innerHTML;
+      if (currentMode === 'source') return sourceEditor.value;
+      // Clean up editor artifacts before saving
+      let html = visualEditor.innerHTML;
+      // Remove resize handles and selection outlines from saved content
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      temp.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+      temp.querySelectorAll('.editor-selected').forEach(el => {
+        el.classList.remove('editor-selected');
+        el.style.outline = '';
+        el.style.outlineOffset = '';
+      });
+      return temp.innerHTML;
     }
 
     function formatHtml(html) {
-      return html
-        .replace(/>\s*</g, '>\n<')
-        .replace(/\n{3,}/g, '\n\n');
+      return html.replace(/>\s*</g, '>\n<').replace(/\n{3,}/g, '\n\n');
     }
 
     function switchToVisual() {
@@ -590,7 +1122,7 @@
     function switchToSource() {
       if (currentMode === 'source') return;
       currentMode = 'source';
-      sourceEditor.value = formatHtml(visualEditor.innerHTML);
+      sourceEditor.value = formatHtml(getContent());
       visualEditor.style.display = 'none';
       sourceEditor.style.display = 'block';
       formatToolbar.style.display = 'none';
@@ -603,7 +1135,6 @@
     tabVisual.addEventListener('click', switchToVisual);
     tabSource.addEventListener('click', switchToSource);
 
-    // Source editor: Tab key for indentation
     sourceEditor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -619,7 +1150,6 @@
     // ===========================
     const saveBtn = document.getElementById('saveBtn');
     const saveStatus = document.getElementById('saveStatus');
-
     saveBtn.addEventListener('click', save);
 
     document.addEventListener('keydown', (e) => {
@@ -631,10 +1161,7 @@
 
     async function save() {
       const title = document.getElementById('guideTitle').value.trim();
-      if (!title) {
-        showToast('Please enter a guide title');
-        return;
-      }
+      if (!title) { showToast('Please enter a guide title'); return; }
 
       saveStatus.textContent = 'Saving...';
       saveStatus.className = 'save-status saving';
@@ -647,11 +1174,7 @@
             body: JSON.stringify({ title })
           });
           const data = await res.json();
-          if (data.error) {
-            showToast(data.error);
-            saveStatus.textContent = '';
-            return;
-          }
+          if (data.error) { showToast(data.error); saveStatus.textContent = ''; return; }
           const content = getContent();
           await fetch(`/admin/guide/${data.slug}/save`, {
             method: 'POST',
@@ -670,11 +1193,7 @@
             body: JSON.stringify({ title, content })
           });
           const data = await res.json();
-          if (data.error) {
-            showToast(data.error);
-            saveStatus.textContent = '';
-            return;
-          }
+          if (data.error) { showToast(data.error); saveStatus.textContent = ''; return; }
           saveStatus.textContent = 'Saved!';
           saveStatus.className = 'save-status saved';
           showToast('Guide saved');
@@ -685,49 +1204,29 @@
         showToast('Error: ' + err.message);
       }
 
-      setTimeout(() => {
-        saveStatus.textContent = '';
-        saveStatus.className = 'save-status';
-      }, 3000);
+      setTimeout(() => { saveStatus.textContent = ''; saveStatus.className = 'save-status'; }, 3000);
     }
 
     // ===========================
-    //  PREVIEW
+    //  PREVIEW / DELETE / TOAST
     // ===========================
     document.getElementById('previewBtn').addEventListener('click', () => {
-      if (currentSlug) {
-        window.open(`/guide/${currentSlug}`, '_blank');
-      } else {
-        showToast('Save the guide first to preview it');
-      }
+      if (currentSlug) window.open(`/guide/${currentSlug}`, '_blank');
+      else showToast('Save the guide first to preview it');
     });
 
-    // ===========================
-    //  DELETE
-    // ===========================
     const deleteBtn = document.getElementById('deleteBtn');
-    if (!isNew) {
-      deleteBtn.style.display = 'inline-flex';
-    }
+    if (!isNew) deleteBtn.style.display = 'inline-flex';
 
-    deleteBtn.addEventListener('click', () => {
-      document.getElementById('deleteModal').classList.add('visible');
-    });
-    document.getElementById('deleteCancel').addEventListener('click', () => {
-      document.getElementById('deleteModal').classList.remove('visible');
-    });
+    deleteBtn.addEventListener('click', () => document.getElementById('deleteModal').classList.add('visible'));
+    document.getElementById('deleteCancel').addEventListener('click', () => document.getElementById('deleteModal').classList.remove('visible'));
     document.getElementById('deleteConfirm').addEventListener('click', async () => {
       try {
         await fetch(`/admin/guide/${currentSlug}/delete`, { method: 'POST' });
         window.location.href = '/';
-      } catch (err) {
-        showToast('Error: ' + err.message);
-      }
+      } catch (err) { showToast('Error: ' + err.message); }
     });
 
-    // ===========================
-    //  TOAST
-    // ===========================
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;

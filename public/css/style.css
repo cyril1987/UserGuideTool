@@ -988,6 +988,27 @@ a:hover {
 }
 
 /* ===========================
+   RICH CONTENT — INLINE ICONS
+   =========================== */
+
+.guide-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.guide-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ===========================
    EDITOR PAGE
    =========================== */
 
