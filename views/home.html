@@ -266,6 +266,43 @@
       padding: 0 2px;
       border-radius: 2px;
     }
+    /* Match type labels */
+    .sr-match-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .sr-match-label.exact { background: #dcfce7; color: #15803d; }
+    .sr-match-label.similar { background: #dbeafe; color: #1d4ed8; }
+    .sr-match-label.related { background: #fef3c7; color: #b45309; }
+    .sr-match-label.fuzzy { background: #f3e8ff; color: #7c3aed; }
+    .sr-matched-terms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .sr-matched-term {
+      font-size: 10px;
+      padding: 1px 6px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+      border-radius: 4px;
+    }
+    .sr-score {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-left: 8px;
+    }
+
     .sr-no-results {
       padding: 32px 20px;
       text-align: center;
@@ -535,11 +572,27 @@
       }
     });
 
-    // Highlight matching text
-    function highlightText(text, query) {
-      if (!query) return escapeHtml(text);
+    // Highlight matching text — highlights the query AND any matched terms
+    function highlightText(text, query, matchedTerms) {
+      if (!query && (!matchedTerms || matchedTerms.length === 0)) return escapeHtml(text);
       const escaped = escapeHtml(text);
-      const re = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+
+      // Collect all terms to highlight (query + matched terms)
+      const terms = new Set();
+      if (query) {
+        // Split query into words for individual highlighting
+        query.split(/\s+/).forEach(w => { if (w.length >= 2) terms.add(w); });
+        // Also add full query for exact phrase highlighting
+        if (query.includes(' ')) terms.add(query);
+      }
+      if (matchedTerms) matchedTerms.forEach(t => { if (t.length >= 2) terms.add(t); });
+
+      // Sort by length descending so longer matches take priority
+      const sorted = [...terms].sort((a, b) => b.length - a.length);
+      const pattern = sorted.map(t => escapeRegex(t)).join('|');
+      if (!pattern) return escaped;
+
+      const re = new RegExp('(' + pattern + ')', 'gi');
       return escaped.replace(re, '<mark>$1</mark>');
     }
     function escapeHtml(str) {
@@ -568,7 +621,7 @@
           <div class="sr-no-results">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="8" x2="14" y2="14"/><line x1="14" y1="8" x2="8" y2="14"/></svg>
             <p><strong>No results found</strong></p>
-            <p style="font-size:12px;color:var(--gray-400);">Try different keywords or check spelling</p>
+            <p style="font-size:12px;color:var(--gray-400);">Try different keywords, synonyms, or check spelling</p>
           </div>
         `;
         searchResults.classList.add('visible');
@@ -578,15 +631,35 @@
       let html = '<div class="search-results-header">Results</div>';
 
       for (const r of results) {
+        const mt = r.matchedTerms || [];
+
+        // Match label class
+        let labelClass = 'exact';
+        if (r.matchLabel === 'fuzzy match') labelClass = 'fuzzy';
+        else if (r.matchLabel === 'related match') labelClass = 'related';
+        else if (r.matchLabel === 'similar match') labelClass = 'similar';
+
         // Guide-level result
         html += `<div class="search-result-item" style="cursor:default;">`;
         html += `<div class="sr-guide-title">
           <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          <a href="/guide/${r.slug}" style="color:inherit;text-decoration:none;">${highlightText(r.title, query)}</a>
+          <a href="/guide/${r.slug}" style="color:inherit;text-decoration:none;">${highlightText(r.title, query, mt)}</a>
+          <span class="sr-match-label ${labelClass}">${escapeHtml(r.matchLabel || 'match')}</span>
         </div>`;
 
+        // Show matched terms if they differ from the raw query
+        if (mt.length > 0) {
+          const queryWords = query.toLowerCase().split(/\s+/);
+          const extraTerms = mt.filter(t => !queryWords.includes(t));
+          if (extraTerms.length > 0) {
+            html += '<div class="sr-matched-terms">';
+            html += extraTerms.slice(0, 4).map(t => `<span class="sr-matched-term">matched: ${escapeHtml(t)}</span>`).join('');
+            html += '</div>';
+          }
+        }
+
         if (r.sections.length === 0 && r.summary) {
-          html += `<div class="sr-guide-summary">${highlightText(r.summary, query)}</div>`;
+          html += `<div class="sr-guide-summary">${highlightText(r.summary, query, mt)}</div>`;
         }
 
         // Section-level results
@@ -597,8 +670,8 @@
             html += `<a href="${sectionUrl}" class="sr-section">
               <span class="sr-section-icon"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
               <div>
-                <div class="sr-section-heading">${highlightText(s.heading, query)}</div>
-                <div class="sr-section-snippet">${highlightText(s.snippet, query)}</div>
+                <div class="sr-section-heading">${highlightText(s.heading, query, mt)}</div>
+                <div class="sr-section-snippet">${highlightText(s.snippet, query, mt)}</div>
               </div>
             </a>`;
           }

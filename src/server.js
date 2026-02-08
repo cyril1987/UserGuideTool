@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
 const db = require('./database');
+const search = require('./search');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -111,84 +112,36 @@ app.get('/guide/:slug', (req, res) => {
   res.send(html);
 });
 
-// Search API
+// Search API (intelligent: tokenization, stemming, synonyms, fuzzy matching)
 app.get('/api/search', (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q || q.length < 2) return res.json({ results: [] });
 
-  const guides = db.searchGuides(q);
-  const results = [];
+  // Build expanded search patterns (tokens + stems + synonyms)
+  const patterns = search.buildSearchPatterns(q);
+  if (patterns.length === 0) return res.json({ results: [] });
 
-  for (const guide of guides) {
-    const sections = [];
-    // Extract headings and surrounding text from HTML content
-    const headingRegex = /<(h[1-4]|div\s+class="[^"]*(?:section-heading|sub-heading|sub2-heading)[^"]*")[^>]*>([\s\S]*?)<\/(?:h[1-4]|div)>/gi;
-    let match;
-    const lowerQ = q.toLowerCase();
+  // Pre-filter candidates from DB using expanded patterns
+  let guides = db.searchGuidesMulti(patterns);
 
-    // Check title match
-    const titleMatch = guide.title.toLowerCase().includes(lowerQ);
+  // Deduplicate (a guide might match multiple patterns)
+  const seen = new Set();
+  let uniqueGuides = guides.filter(g => {
+    if (seen.has(g.id)) return false;
+    seen.add(g.id);
+    return true;
+  });
 
-    // Strip HTML tags helper
-    const stripHtml = (html) => html.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
-
-    // Extract all sections with their text content
-    const allContent = stripHtml(guide.content);
-    const contentChunks = guide.content.split(/<h[1-4][^>]*>|<div\s+class="[^"]*(?:section-heading|sub-heading|sub2-heading)/i);
-
-    while ((match = headingRegex.exec(guide.content)) !== null) {
-      const headingHtml = match[2];
-      const headingText = stripHtml(headingHtml);
-      if (!headingText) continue;
-
-      // Get content after this heading until next heading
-      const afterPos = match.index + match[0].length;
-      const nextHeading = guide.content.indexOf('<h', afterPos);
-      const nextDiv = guide.content.indexOf('<div class="section-heading', afterPos);
-      let endPos = guide.content.length;
-      if (nextHeading > 0 && nextHeading < endPos) endPos = nextHeading;
-      if (nextDiv > 0 && nextDiv < endPos) endPos = nextDiv;
-      const sectionContent = stripHtml(guide.content.substring(afterPos, Math.min(afterPos + 500, endPos)));
-
-      const sectionLower = (headingText + ' ' + sectionContent).toLowerCase();
-      if (sectionLower.includes(lowerQ)) {
-        // Build snippet with highlight context
-        const fullText = headingText + ' — ' + sectionContent;
-        const idx = fullText.toLowerCase().indexOf(lowerQ);
-        let snippet = '';
-        if (idx >= 0) {
-          const start = Math.max(0, idx - 60);
-          const end = Math.min(fullText.length, idx + q.length + 60);
-          snippet = (start > 0 ? '...' : '') + fullText.substring(start, end) + (end < fullText.length ? '...' : '');
-        } else {
-          snippet = sectionContent.substring(0, 120) + (sectionContent.length > 120 ? '...' : '');
-        }
-
-        // Create anchor ID from heading text
-        const anchorId = headingText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
-
-        sections.push({
-          heading: headingText,
-          snippet,
-          anchorId
-        });
-      }
-    }
-
-    // If title matches but no section matches, add guide-level result
-    if (titleMatch || sections.length > 0) {
-      results.push({
-        title: guide.title,
-        slug: guide.slug,
-        updatedAt: guide.updated_at,
-        titleMatch,
-        sections: sections.slice(0, 5), // max 5 section results per guide
-        summary: allContent.substring(0, 150) + (allContent.length > 150 ? '...' : '')
-      });
-    }
+  // If DB pre-filter found nothing, fetch all guides for fuzzy matching
+  // (typos won't match LIKE patterns, but Levenshtein will catch them)
+  if (uniqueGuides.length === 0) {
+    uniqueGuides = db.getAllGuidesWithContent();
   }
 
-  res.json({ results: results.slice(0, 10), query: q });
+  // Run intelligent scoring + ranking
+  const results = search.smartSearch(uniqueGuides, q);
+
+  res.json({ results, query: q });
 });
 
 // =====================

@@ -46,6 +46,10 @@ function getAllGuides() {
   return getDb().prepare('SELECT id, title, slug, created_at, updated_at FROM guides ORDER BY updated_at DESC').all();
 }
 
+function getAllGuidesWithContent() {
+  return getDb().prepare('SELECT id, title, slug, content, updated_at FROM guides ORDER BY updated_at DESC').all();
+}
+
 function getGuideBySlug(slug) {
   return getDb().prepare('SELECT * FROM guides WHERE slug = ?').get(slug);
 }
@@ -87,9 +91,27 @@ function searchGuides(query) {
   ).all(pattern, pattern, pattern);
 }
 
+// Smart search: fetch guides matching any of the given LIKE patterns
+function searchGuidesMulti(patterns) {
+  if (!patterns || patterns.length === 0) return [];
+
+  const conditions = patterns.map(() => '(title LIKE ? OR content LIKE ?)').join(' OR ');
+  const params = [];
+  for (const p of patterns) {
+    params.push(p, p);
+  }
+
+  return getDb().prepare(
+    `SELECT id, title, slug, content, updated_at FROM guides
+     WHERE ${conditions}
+     ORDER BY updated_at DESC`
+  ).all(...params);
+}
+
 module.exports = {
   getDb,
   getAllGuides,
+  getAllGuidesWithContent,
   getGuideBySlug,
   createGuide,
   updateGuide,
@@ -97,4 +119,5 @@ module.exports = {
   verifyPassword,
   changePassword,
   searchGuides,
+  searchGuidesMulti,
 };
