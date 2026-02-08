@@ -91,6 +91,67 @@
       font-weight: 600;
       margin-right: 4px;
     }
+
+    /* Mode toggle tabs */
+    .editor-mode-tabs {
+      display: flex;
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 16px;
+    }
+    .editor-mode-tab {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--gray-500);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .editor-mode-tab:hover {
+      color: var(--gray-700);
+    }
+    .editor-mode-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: white;
+    }
+
+    /* HTML Source editor */
+    #source-editor {
+      display: none;
+      width: 100%;
+      min-height: 600px;
+      padding: 16px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      border: none;
+      outline: none;
+      resize: vertical;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      tab-size: 2;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    #source-editor:focus {
+      outline: none;
+    }
+
+    /* Hide Quill toolbars when in source mode */
+    .source-mode #quill-toolbar,
+    .source-mode .custom-toolbar {
+      display: none;
+    }
+    .source-mode .editor-body {
+      display: none;
+    }
+    .source-mode #source-editor {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -155,7 +216,7 @@
     </div>
 
     <!-- Custom insert toolbar -->
-    <div class="custom-toolbar">
+    <div class="custom-toolbar" id="customToolbar">
       <span class="custom-toolbar-label">Insert:</span>
       <button class="custom-btn" id="insertTip" title="Insert a Tip callout">&#x2705; Tip</button>
       <button class="custom-btn" id="insertBulb" title="Insert a Did You Know callout">&#x1F4A1; Did You Know</button>
@@ -164,10 +225,19 @@
       <button class="custom-btn" id="insertImage" title="Upload an image">&#x1F4F7; Upload Image</button>
     </div>
 
-    <!-- Editor -->
-    <div class="editor-body">
+    <!-- Editor mode tabs -->
+    <div class="editor-mode-tabs">
+      <button class="editor-mode-tab active" id="tabVisual">Visual</button>
+      <button class="editor-mode-tab" id="tabSource">HTML Source</button>
+    </div>
+
+    <!-- Visual Editor (Quill) -->
+    <div class="editor-body" id="visualEditor">
       <div id="editor-container"></div>
     </div>
+
+    <!-- HTML Source Editor -->
+    <textarea id="source-editor" spellcheck="false"></textarea>
   </div>
 
   <!-- Table insert modal -->
@@ -214,6 +284,16 @@
     const currentSlug = '{{slug}}';
     const existingContent = isNew ? '' : `{{content}}`;
 
+    // --- Editor mode state ---
+    let currentMode = 'visual'; // 'visual' or 'source'
+    const tabVisual = document.getElementById('tabVisual');
+    const tabSource = document.getElementById('tabSource');
+    const visualEditor = document.getElementById('visualEditor');
+    const sourceEditor = document.getElementById('source-editor');
+    const quillToolbar = document.getElementById('quill-toolbar');
+    const customToolbar = document.getElementById('customToolbar');
+    const editorLayout = document.querySelector('.editor-layout');
+
     // --- Initialize Quill ---
     const quill = new Quill('#editor-container', {
       theme: 'snow',
@@ -227,6 +307,74 @@
     // Load existing content
     if (!isNew && existingContent) {
       quill.root.innerHTML = existingContent;
+    }
+
+    // --- Mode switching ---
+    function getContent() {
+      if (currentMode === 'source') {
+        return sourceEditor.value;
+      }
+      return quill.root.innerHTML;
+    }
+
+    function switchToVisual() {
+      if (currentMode === 'visual') return;
+      currentMode = 'visual';
+      // Transfer source HTML back to Quill
+      quill.root.innerHTML = sourceEditor.value;
+      // Show visual, hide source
+      visualEditor.style.display = '';
+      sourceEditor.style.display = 'none';
+      quillToolbar.style.display = '';
+      customToolbar.style.display = '';
+      tabVisual.classList.add('active');
+      tabSource.classList.remove('active');
+    }
+
+    function switchToSource() {
+      if (currentMode === 'source') return;
+      currentMode = 'source';
+      // Transfer Quill HTML to source textarea
+      sourceEditor.value = formatHtml(quill.root.innerHTML);
+      // Show source, hide visual
+      visualEditor.style.display = 'none';
+      sourceEditor.style.display = 'block';
+      quillToolbar.style.display = 'none';
+      customToolbar.style.display = 'none';
+      tabSource.classList.add('active');
+      tabVisual.classList.remove('active');
+      sourceEditor.focus();
+    }
+
+    // Simple HTML formatter for readability in source mode
+    function formatHtml(html) {
+      // Light formatting: add newlines after closing block tags for readability
+      return html
+        .replace(/>\s*</g, '>\n<')
+        .replace(/\n{3,}/g, '\n\n');
+    }
+
+    tabVisual.addEventListener('click', switchToVisual);
+    tabSource.addEventListener('click', switchToSource);
+
+    // If the content has rich HTML that Quill strips, auto-switch to source mode
+    if (!isNew && existingContent) {
+      const richPatterns = ['.card', '.callout', '.concept-box', '.flow-diagram', '.overview-panel',
+        '.compare-table', '.steps', '.section-heading', '.sub-heading', '.faq', '.status'];
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = existingContent;
+      const hasRichContent = richPatterns.some(sel => tempDiv.querySelector(sel));
+      if (hasRichContent) {
+        // Content has rich HTML — start in source mode to preserve it
+        sourceEditor.value = formatHtml(existingContent);
+        currentMode = 'source';
+        visualEditor.style.display = 'none';
+        sourceEditor.style.display = 'block';
+        quillToolbar.style.display = 'none';
+        customToolbar.style.display = 'none';
+        tabSource.classList.add('active');
+        tabVisual.classList.remove('active');
+      }
     }
 
     // --- Image upload handler ---
@@ -360,7 +508,7 @@
             return;
           }
           // Now save content
-          const content = quill.root.innerHTML;
+          const content = getContent();
           await fetch(`/admin/guide/${data.slug}/save`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -375,7 +523,7 @@
           window.location.href = `/admin/guide/${data.slug}`;
         } else {
           // Update existing guide
-          const content = quill.root.innerHTML;
+          const content = getContent();
           const res = await fetch(`/admin/guide/${currentSlug}/save`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -454,6 +602,17 @@
 
     quill.root.addEventListener('dragover', (e) => {
       e.preventDefault();
+    });
+
+    // --- Source editor: Tab key for indentation ---
+    sourceEditor.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = sourceEditor.selectionStart;
+        const end = sourceEditor.selectionEnd;
+        sourceEditor.value = sourceEditor.value.substring(0, start) + '  ' + sourceEditor.value.substring(end);
+        sourceEditor.selectionStart = sourceEditor.selectionEnd = start + 2;
+      }
     });
   </script>
 </body>
