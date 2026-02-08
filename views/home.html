@@ -303,6 +303,82 @@
       margin-left: 8px;
     }
 
+    /* Smart answer card */
+    .sr-answer-card {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #f0f7ff 0%, #eef2ff 100%);
+      border-bottom: 1px solid #c7d2fe;
+    }
+    .sr-answer-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .sr-answer-header svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--primary);
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+    .sr-answer-header span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+    }
+    .sr-answer-confidence {
+      margin-left: auto;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .sr-answer-confidence.high { background: #dcfce7; color: #15803d; }
+    .sr-answer-confidence.medium { background: #fef3c7; color: #b45309; }
+    .sr-answer-confidence.low { background: var(--gray-100); color: var(--gray-500); }
+    .sr-answer-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--gray-800);
+      margin-bottom: 10px;
+    }
+    .sr-answer-text mark {
+      background: #fef08a;
+      color: var(--gray-900);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+    .sr-answer-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 4px 10px;
+      background: white;
+      border: 1px solid #c7d2fe;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .sr-answer-source:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .sr-answer-source svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
     .sr-no-results {
       padding: 32px 20px;
       text-align: center;
@@ -607,7 +683,7 @@
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
         searchSpinner.classList.remove('visible');
-        renderResults(data.results, query);
+        renderResults(data.results, query, data.answer);
       } catch (err) {
         searchSpinner.classList.remove('visible');
         searchResults.innerHTML = '<div class="sr-no-results"><p>Search failed. Please try again.</p></div>';
@@ -615,7 +691,7 @@
       }
     }
 
-    function renderResults(results, query) {
+    function renderResults(results, query, answer) {
       if (results.length === 0) {
         searchResults.innerHTML = `
           <div class="sr-no-results">
@@ -628,7 +704,31 @@
         return;
       }
 
-      let html = '<div class="search-results-header">Results</div>';
+      let html = '';
+
+      // --- Smart answer card ---
+      if (answer && answer.text) {
+        const answerUrl = answer.anchorId
+          ? `/guide/${answer.slug}#${encodeURIComponent(answer.anchorId)}`
+          : `/guide/${answer.slug}`;
+        const confLabel = answer.confidence === 'high' ? 'Best answer' : answer.confidence === 'medium' ? 'Likely answer' : 'Possible answer';
+
+        html += `<div class="sr-answer-card">
+          <div class="sr-answer-header">
+            <svg viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            <span>Quick Answer</span>
+            <span class="sr-answer-confidence ${answer.confidence}">${confLabel}</span>
+          </div>
+          <div class="sr-answer-text">${highlightText(answer.text, query, results[0]?.matchedTerms)}</div>
+          <a href="${answerUrl}" class="sr-answer-source">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            ${escapeHtml(answer.guideTitle)}${answer.heading ? ' — ' + escapeHtml(answer.heading) : ''}
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>`;
+      }
+
+      html += '<div class="search-results-header">Results</div>';
 
       for (const r of results) {
         const mt = r.matchedTerms || [];

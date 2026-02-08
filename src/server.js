@@ -141,7 +141,10 @@ app.get('/api/search', (req, res) => {
   // Run intelligent scoring + ranking
   const results = search.smartSearch(uniqueGuides, q);
 
-  res.json({ results, query: q });
+  // Generate direct answer for question-style queries
+  const answer = search.generateAnswer(uniqueGuides, q, results);
+
+  res.json({ results, query: q, answer: answer || null });
 });
 
 // =====================

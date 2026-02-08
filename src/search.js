@@ -522,9 +522,153 @@ function buildSearchPatterns(rawQuery) {
   return [...patterns];
 }
 
+// --- Detect if query is a question ---
+function isQuestion(query) {
+  const q = query.toLowerCase().trim();
+  const questionStarters = [
+    'how', 'what', 'where', 'when', 'why', 'who', 'which',
+    'can i', 'can you', 'do i', 'do we', 'does', 'is there',
+    'is it', 'are there', 'should i', 'could i', 'would',
+    'tell me', 'show me', 'explain', 'help me', 'i want to',
+    'i need to', 'how to', 'how do', 'how can', 'what is',
+    'what are', 'where is', 'where do', 'where can'
+  ];
+  if (q.endsWith('?')) return true;
+  return questionStarters.some(s => q.startsWith(s));
+}
+
+// --- Generate a direct answer for a question ---
+function generateAnswer(guides, rawQuery, searchResults) {
+  if (!isQuestion(rawQuery) || searchResults.length === 0) return null;
+
+  const queryLower = rawQuery.toLowerCase();
+  const tokens = tokenize(rawQuery);
+  if (tokens.length === 0) return null;
+
+  // Use the best-scoring result
+  const best = searchResults[0];
+  const guide = guides.find(g => g.slug === best.slug);
+  if (!guide || !guide.content) return null;
+
+  const plainContent = stripHtml(guide.content);
+
+  // Try to find the best paragraph-level answer
+  // Split content into paragraphs
+  const paragraphs = guide.content
+    .split(/<\/p>|<\/div>|<\/li>|<br\s*\/?>|<\/tr>/)
+    .map(p => stripHtml(p))
+    .filter(p => p.length > 30 && p.length < 600);
+
+  let bestParagraph = '';
+  let bestParaScore = 0;
+
+  for (const para of paragraphs) {
+    const paraLower = para.toLowerCase();
+    let paraScore = 0;
+
+    // Score based on how many tokens appear in this paragraph
+    for (const token of tokens) {
+      if (paraLower.includes(token)) paraScore += 10;
+      // Check stems
+      const stemmed = stem(token);
+      if (stemmed !== token && paraLower.includes(stemmed)) paraScore += 7;
+      // Check synonyms
+      const syns = getSynonyms(token);
+      for (const syn of syns) {
+        if (paraLower.includes(syn)) { paraScore += 4; break; }
+      }
+    }
+
+    // Bonus for paragraphs that contain action words matching question type
+    if (queryLower.startsWith('how')) {
+      // Prefer paragraphs with instructional language
+      if (/\b(click|go to|navigate|select|open|press|enter|choose|tap|drag)\b/i.test(para)) paraScore += 8;
+      if (/\b(step|first|then|next|finally)\b/i.test(para)) paraScore += 5;
+    }
+    if (queryLower.startsWith('what')) {
+      // Prefer paragraphs with definitional language
+      if (/\b(is a|is the|are the|refers to|means|provides|allows)\b/i.test(para)) paraScore += 8;
+    }
+    if (queryLower.startsWith('where')) {
+      if (/\b(found in|located|go to|navigate|menu|tab|page|section)\b/i.test(para)) paraScore += 8;
+    }
+
+    // Prefer moderately-sized paragraphs (not too short, not too long)
+    if (para.length > 50 && para.length < 300) paraScore += 3;
+
+    if (paraScore > bestParaScore) {
+      bestParaScore = paraScore;
+      bestParagraph = para;
+    }
+  }
+
+  if (!bestParagraph || bestParaScore < 10) {
+    // Fall back to the best section snippet
+    if (best.sections.length > 0) {
+      return {
+        text: best.sections[0].snippet,
+        heading: best.sections[0].heading,
+        guideTitle: best.title,
+        slug: best.slug,
+        anchorId: best.sections[0].anchorId,
+        confidence: 'low'
+      };
+    }
+    return null;
+  }
+
+  // Trim answer to a reasonable length
+  let answer = bestParagraph;
+  if (answer.length > 300) {
+    // Try to cut at a sentence boundary
+    const sentenceEnd = answer.indexOf('. ', 150);
+    if (sentenceEnd > 0 && sentenceEnd < 350) {
+      answer = answer.substring(0, sentenceEnd + 1);
+    } else {
+      answer = answer.substring(0, 300) + '...';
+    }
+  }
+
+  // Find which section this paragraph belongs to
+  let answerHeading = '';
+  let answerAnchorId = '';
+  if (best.sections.length > 0) {
+    // Find the section whose snippet best overlaps with the answer
+    let bestOverlap = 0;
+    for (const sec of best.sections) {
+      const words = sec.snippet.toLowerCase().split(/\s+/);
+      let overlap = 0;
+      for (const w of words) {
+        if (w.length > 3 && answer.toLowerCase().includes(w)) overlap++;
+      }
+      if (overlap > bestOverlap) {
+        bestOverlap = overlap;
+        answerHeading = sec.heading;
+        answerAnchorId = sec.anchorId;
+      }
+    }
+    // If no overlap found, use the first section
+    if (!answerHeading && best.sections[0]) {
+      answerHeading = best.sections[0].heading;
+      answerAnchorId = best.sections[0].anchorId;
+    }
+  }
+
+  return {
+    text: answer,
+    heading: answerHeading,
+    guideTitle: best.title,
+    slug: best.slug,
+    anchorId: answerAnchorId,
+    confidence: bestParaScore >= 20 ? 'high' : 'medium'
+  };
+}
+
 module.exports = {
   smartSearch,
   buildSearchPatterns,
+  generateAnswer,
+  isQuestion,
   tokenize,
   stem,
   getSynonyms,

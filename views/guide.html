@@ -45,6 +45,11 @@
       `;
     }
 
+    // Generate a text-based ID from heading text (matches search engine anchor format)
+    function textToAnchorId(text) {
+      return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
+    }
+
     // Generate TOC from headings (supports h2, h3, and custom .section-heading, .sub-heading, .sub2-heading)
     function buildToc() {
       const content = document.getElementById('guideContent');
@@ -57,15 +62,23 @@
         return;
       }
 
+      const usedIds = new Set();
       const seen = new Set();
       headings.forEach((heading, i) => {
         if (seen.has(heading)) return;
         seen.add(heading);
 
-        // Use existing id or generate one
-        if (!heading.id) {
-          heading.id = 'section-' + i;
+        // Generate text-based ID so search deep links work
+        const baseId = textToAnchorId(heading.textContent);
+        let anchorId = baseId || 'section-' + i;
+        // Ensure uniqueness
+        if (usedIds.has(anchorId)) {
+          let c = 2;
+          while (usedIds.has(anchorId + '-' + c)) c++;
+          anchorId = anchorId + '-' + c;
         }
+        usedIds.add(anchorId);
+        heading.id = anchorId;
 
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -86,6 +99,7 @@
         a.addEventListener('click', (e) => {
           e.preventDefault();
           heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', '#' + heading.id);
         });
         li.appendChild(a);
         toc.appendChild(li);
@@ -97,7 +111,7 @@
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             tocLinks.forEach(l => l.classList.remove('active'));
-            const active = toc.querySelector(`a[href="#${entry.target.id}"]`);
+            const active = toc.querySelector(`a[href="#${CSS.escape(entry.target.id)}"]`);
             if (active) active.classList.add('active');
           }
         });
@@ -107,6 +121,48 @@
     }
 
     buildToc();
+
+    // --- Scroll to hash section on page load (deep link from search) ---
+    function scrollToHash() {
+      const hash = decodeURIComponent(window.location.hash.substring(1));
+      if (!hash) return;
+
+      // Try exact ID match first
+      let target = document.getElementById(hash);
+
+      // If no exact match, try fuzzy matching against heading IDs
+      if (!target) {
+        const allHeadings = document.querySelectorAll('#guideContent h2, #guideContent h3, #guideContent .section-heading, #guideContent .sub-heading, #guideContent .sub2-heading');
+        for (const h of allHeadings) {
+          if (h.id && (h.id === hash || h.id.startsWith(hash))) {
+            target = h;
+            break;
+          }
+        }
+      }
+
+      if (target) {
+        // Small delay to let page render fully
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Highlight the section briefly
+          target.style.transition = 'background 0.3s ease';
+          target.style.background = '#fef08a';
+          target.style.borderRadius = '4px';
+          target.style.padding = '2px 8px';
+          target.style.marginLeft = '-8px';
+          setTimeout(() => {
+            target.style.background = '';
+            target.style.borderRadius = '';
+            target.style.padding = '';
+            target.style.marginLeft = '';
+          }, 2500);
+        }, 300);
+      }
+    }
+
+    scrollToHash();
+    window.addEventListener('hashchange', scrollToHash);
   </script>
 </body>
 </html>
