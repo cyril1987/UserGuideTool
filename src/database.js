@@ -76,6 +76,17 @@ function changePassword(newPassword) {
   return getDb().prepare('UPDATE config SET value = ? WHERE key = ?').run(hash, 'admin_password');
 }
 
+function searchGuides(query) {
+  const pattern = `%${query}%`;
+  return getDb().prepare(
+    `SELECT id, title, slug, content, updated_at FROM guides
+     WHERE title LIKE ? OR content LIKE ?
+     ORDER BY
+       CASE WHEN title LIKE ? THEN 0 ELSE 1 END,
+       updated_at DESC`
+  ).all(pattern, pattern, pattern);
+}
+
 module.exports = {
   getDb,
   getAllGuides,
@@ -85,4 +96,5 @@ module.exports = {
   deleteGuide,
   verifyPassword,
   changePassword,
+  searchGuides,
 };

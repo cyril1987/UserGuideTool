@@ -73,12 +73,22 @@ app.get('/', (req, res) => {
   const guides = db.getAllGuides();
   const guideListHtml = guides.length > 0
     ? guides.map(g => `
-        <a href="/guide/${g.slug}" class="guide-card">
+        <a href="/guide/${g.slug}" class="guide-card-v2">
+          <div class="gc-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
           <h3>${escapeHtml(g.title)}</h3>
-          <span class="guide-date">Updated: ${new Date(g.updated_at).toLocaleDateString()}</span>
+          <div class="gc-meta">Updated: ${new Date(g.updated_at).toLocaleDateString()}</div>
+          <div class="gc-arrow">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </a>
       `).join('')
-    : '<p class="empty-state">No guides created yet.</p>';
+    : `<div class="empty-state-v2">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>No guides created yet.</p>
+        <p style="font-size:13px;">Create your first guide to get started.</p>
+      </div>`;
 
   const html = renderTemplate('home.html', {
     guideList: guideListHtml,
@@ -99,6 +109,86 @@ app.get('/guide/:slug', (req, res) => {
     isAdmin: req.session && req.session.isAdmin ? 'true' : 'false'
   });
   res.send(html);
+});
+
+// Search API
+app.get('/api/search', (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (!q || q.length < 2) return res.json({ results: [] });
+
+  const guides = db.searchGuides(q);
+  const results = [];
+
+  for (const guide of guides) {
+    const sections = [];
+    // Extract headings and surrounding text from HTML content
+    const headingRegex = /<(h[1-4]|div\s+class="[^"]*(?:section-heading|sub-heading|sub2-heading)[^"]*")[^>]*>([\s\S]*?)<\/(?:h[1-4]|div)>/gi;
+    let match;
+    const lowerQ = q.toLowerCase();
+
+    // Check title match
+    const titleMatch = guide.title.toLowerCase().includes(lowerQ);
+
+    // Strip HTML tags helper
+    const stripHtml = (html) => html.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Extract all sections with their text content
+    const allContent = stripHtml(guide.content);
+    const contentChunks = guide.content.split(/<h[1-4][^>]*>|<div\s+class="[^"]*(?:section-heading|sub-heading|sub2-heading)/i);
+
+    while ((match = headingRegex.exec(guide.content)) !== null) {
+      const headingHtml = match[2];
+      const headingText = stripHtml(headingHtml);
+      if (!headingText) continue;
+
+      // Get content after this heading until next heading
+      const afterPos = match.index + match[0].length;
+      const nextHeading = guide.content.indexOf('<h', afterPos);
+      const nextDiv = guide.content.indexOf('<div class="section-heading', afterPos);
+      let endPos = guide.content.length;
+      if (nextHeading > 0 && nextHeading < endPos) endPos = nextHeading;
+      if (nextDiv > 0 && nextDiv < endPos) endPos = nextDiv;
+      const sectionContent = stripHtml(guide.content.substring(afterPos, Math.min(afterPos + 500, endPos)));
+
+      const sectionLower = (headingText + ' ' + sectionContent).toLowerCase();
+      if (sectionLower.includes(lowerQ)) {
+        // Build snippet with highlight context
+        const fullText = headingText + ' — ' + sectionContent;
+        const idx = fullText.toLowerCase().indexOf(lowerQ);
+        let snippet = '';
+        if (idx >= 0) {
+          const start = Math.max(0, idx - 60);
+          const end = Math.min(fullText.length, idx + q.length + 60);
+          snippet = (start > 0 ? '...' : '') + fullText.substring(start, end) + (end < fullText.length ? '...' : '');
+        } else {
+          snippet = sectionContent.substring(0, 120) + (sectionContent.length > 120 ? '...' : '');
+        }
+
+        // Create anchor ID from heading text
+        const anchorId = headingText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
+
+        sections.push({
+          heading: headingText,
+          snippet,
+          anchorId
+        });
+      }
+    }
+
+    // If title matches but no section matches, add guide-level result
+    if (titleMatch || sections.length > 0) {
+      results.push({
+        title: guide.title,
+        slug: guide.slug,
+        updatedAt: guide.updated_at,
+        titleMatch,
+        sections: sections.slice(0, 5), // max 5 section results per guide
+        summary: allContent.substring(0, 150) + (allContent.length > 150 ? '...' : '')
+      });
+    }
+  }
+
+  res.json({ results: results.slice(0, 10), query: q });
 });
 
 // =====================
