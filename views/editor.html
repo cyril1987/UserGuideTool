@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{pageTitle}} — User Guides</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+  <style>
+    /* Table styles in editor */
+    .ql-editor table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .ql-editor table td {
+      border: 1px solid var(--gray-200);
+      padding: 8px 12px;
+      min-width: 80px;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.visible {
+      display: flex;
+    }
+    .modal {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 400px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--gray-900);
+    }
+    .modal .form-group {
+      margin-bottom: 12px;
+    }
+    .modal .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    /* Insert block toolbar section */
+    .ql-snow .ql-toolbar .ql-formats .custom-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--gray-600);
+      white-space: nowrap;
+      height: 28px;
+    }
+    .custom-btn:hover {
+      background: var(--gray-100);
+      color: var(--gray-800);
+    }
+    .custom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      flex-wrap: wrap;
+    }
+    .custom-toolbar-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-400);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+      User Guides
+    </a>
+    <div class="navbar-actions">
+      <a href="/" class="btn btn-secondary btn-sm">All Guides</a>
+      <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+    </div>
+  </nav>
+
+  <div class="editor-layout">
+    <!-- Top bar with title and save -->
+    <div class="editor-toolbar-top">
+      <input type="text" class="editor-title-input" id="guideTitle" placeholder="Guide title..." value="{{title}}">
+      <div class="editor-actions">
+        <span class="save-status" id="saveStatus"></span>
+        <button class="btn btn-danger btn-sm" id="deleteBtn" style="display:none;">Delete</button>
+        <button class="btn btn-secondary btn-sm" id="previewBtn">Preview</button>
+        <button class="btn btn-primary btn-sm" id="saveBtn">Save</button>
+      </div>
+    </div>
+
+    <!-- Quill toolbar -->
+    <div id="quill-toolbar">
+      <span class="ql-formats">
+        <select class="ql-header">
+          <option value="">Normal</option>
+          <option value="1">Heading 1</option>
+          <option value="2">Heading 2</option>
+          <option value="3">Heading 3</option>
+        </select>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+      </span>
+      <span class="ql-formats">
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-clean"></button>
+      </span>
+    </div>
+
+    <!-- Custom insert toolbar -->
+    <div class="custom-toolbar">
+      <span class="custom-toolbar-label">Insert:</span>
+      <button class="custom-btn" id="insertTip" title="Insert a Tip callout">&#x2705; Tip</button>
+      <button class="custom-btn" id="insertBulb" title="Insert a Did You Know callout">&#x1F4A1; Did You Know</button>
+      <button class="custom-btn" id="insertHighlight" title="Insert a Highlight callout">&#x1F4CC; Highlight</button>
+      <button class="custom-btn" id="insertTable" title="Insert a table">&#x1F4CB; Table</button>
+      <button class="custom-btn" id="insertImage" title="Upload an image">&#x1F4F7; Upload Image</button>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-body">
+      <div id="editor-container"></div>
+    </div>
+  </div>
+
+  <!-- Table insert modal -->
+  <div class="modal-overlay" id="tableModal">
+    <div class="modal">
+      <h3>Insert Table</h3>
+      <div class="form-group">
+        <label for="tableRows">Rows</label>
+        <input type="number" id="tableRows" value="3" min="1" max="20">
+      </div>
+      <div class="form-group">
+        <label for="tableCols">Columns</label>
+        <input type="number" id="tableCols" value="3" min="1" max="10">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="tableCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="tableInsert">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input for image upload -->
+  <input type="file" id="imageInput" accept="image/*" style="display:none;">
+
+  <!-- Delete confirmation modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h3>Delete Guide</h3>
+      <p style="color:var(--gray-600);margin-bottom:16px;">Are you sure you want to permanently delete this guide? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="deleteCancel">Cancel</button>
+        <button class="btn btn-danger btn-sm" id="deleteConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+  <script>
+    // --- Config ---
+    const isNew = {{isNew}};
+    const currentSlug = '{{slug}}';
+    const existingContent = isNew ? '' : `{{content}}`;
+
+    // --- Initialize Quill ---
+    const quill = new Quill('#editor-container', {
+      theme: 'snow',
+      modules: {
+        toolbar: '#quill-toolbar',
+        table: false
+      },
+      placeholder: 'Start writing your guide...'
+    });
+
+    // Load existing content
+    if (!isNew && existingContent) {
+      quill.root.innerHTML = existingContent;
+    }
+
+    // --- Image upload handler ---
+    // Override Quill's default image handler
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', () => {
+      document.getElementById('imageInput').click();
+    });
+
+    document.getElementById('imageInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      await uploadAndInsertImage(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('insertImage').addEventListener('click', () => {
+      document.getElementById('imageInput').click();
+    });
+
+    async function uploadAndInsertImage(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await fetch('/admin/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.url) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', data.url);
+          quill.setSelection(range.index + 1);
+          showToast('Image uploaded');
+        } else {
+          showToast('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        showToast('Upload failed: ' + err.message);
+      }
+    }
+
+    // --- Callout insertion ---
+    function insertCallout(type, icon, label) {
+      const range = quill.getSelection(true);
+      const html = `<div class="callout callout-${type}"><span class="callout-icon">${icon}</span><div class="callout-body"><strong>${label}</strong><p>Type your content here...</p></div></div>`;
+
+      quill.clipboard.dangerouslyPasteHTML(range.index, html);
+      showToast(`${label} block inserted`);
+    }
+
+    document.getElementById('insertTip').addEventListener('click', () => {
+      insertCallout('tip', '&#x2705;', 'Tip');
+    });
+
+    document.getElementById('insertBulb').addEventListener('click', () => {
+      insertCallout('bulb', '&#x1F4A1;', 'Did You Know?');
+    });
+
+    document.getElementById('insertHighlight').addEventListener('click', () => {
+      insertCallout('highlight', '&#x1F4CC;', 'Important');
+    });
+
+    // --- Table insertion ---
+    document.getElementById('insertTable').addEventListener('click', () => {
+      document.getElementById('tableModal').classList.add('visible');
+    });
+
+    document.getElementById('tableCancel').addEventListener('click', () => {
+      document.getElementById('tableModal').classList.remove('visible');
+    });
+
+    document.getElementById('tableInsert').addEventListener('click', () => {
+      const rows = parseInt(document.getElementById('tableRows').value) || 3;
+      const cols = parseInt(document.getElementById('tableCols').value) || 3;
+
+      let tableHtml = '<table><thead><tr>';
+      for (let c = 0; c < cols; c++) {
+        tableHtml += `<th>Header ${c + 1}</th>`;
+      }
+      tableHtml += '</tr></thead><tbody>';
+      for (let r = 0; r < rows - 1; r++) {
+        tableHtml += '<tr>';
+        for (let c = 0; c < cols; c++) {
+          tableHtml += '<td>&nbsp;</td>';
+        }
+        tableHtml += '</tr>';
+      }
+      tableHtml += '</tbody></table><p><br></p>';
+
+      const range = quill.getSelection(true);
+      quill.clipboard.dangerouslyPasteHTML(range.index, tableHtml);
+      document.getElementById('tableModal').classList.remove('visible');
+      showToast('Table inserted');
+    });
+
+    // --- Save guide ---
+    const saveBtn = document.getElementById('saveBtn');
+    const saveStatus = document.getElementById('saveStatus');
+
+    saveBtn.addEventListener('click', save);
+
+    // Ctrl+S / Cmd+S shortcut
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        save();
+      }
+    });
+
+    async function save() {
+      const title = document.getElementById('guideTitle').value.trim();
+      if (!title) {
+        showToast('Please enter a guide title');
+        return;
+      }
+
+      saveStatus.textContent = 'Saving...';
+      saveStatus.className = 'save-status saving';
+
+      try {
+        if (isNew && !currentSlug) {
+          // Create new guide
+          const res = await fetch('/admin/guide/new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title })
+          });
+          const data = await res.json();
+          if (data.error) {
+            showToast(data.error);
+            saveStatus.textContent = '';
+            return;
+          }
+          // Now save content
+          const content = quill.root.innerHTML;
+          await fetch(`/admin/guide/${data.slug}/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content })
+          });
+
+          saveStatus.textContent = 'Saved!';
+          saveStatus.className = 'save-status saved';
+          showToast('Guide created');
+
+          // Redirect to edit mode for the new slug
+          window.location.href = `/admin/guide/${data.slug}`;
+        } else {
+          // Update existing guide
+          const content = quill.root.innerHTML;
+          const res = await fetch(`/admin/guide/${currentSlug}/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content })
+          });
+          const data = await res.json();
+          if (data.error) {
+            showToast(data.error);
+            saveStatus.textContent = '';
+            return;
+          }
+          saveStatus.textContent = 'Saved!';
+          saveStatus.className = 'save-status saved';
+          showToast('Guide saved');
+        }
+      } catch (err) {
+        saveStatus.textContent = 'Error saving';
+        saveStatus.className = 'save-status';
+        showToast('Error: ' + err.message);
+      }
+
+      setTimeout(() => {
+        saveStatus.textContent = '';
+        saveStatus.className = 'save-status';
+      }, 3000);
+    }
+
+    // --- Preview ---
+    document.getElementById('previewBtn').addEventListener('click', () => {
+      if (currentSlug) {
+        window.open(`/guide/${currentSlug}`, '_blank');
+      } else {
+        showToast('Save the guide first to preview it');
+      }
+    });
+
+    // --- Delete ---
+    const deleteBtn = document.getElementById('deleteBtn');
+    if (!isNew) {
+      deleteBtn.style.display = 'inline-flex';
+    }
+
+    deleteBtn.addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.add('visible');
+    });
+
+    document.getElementById('deleteCancel').addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.remove('visible');
+    });
+
+    document.getElementById('deleteConfirm').addEventListener('click', async () => {
+      try {
+        await fetch(`/admin/guide/${currentSlug}/delete`, { method: 'POST' });
+        window.location.href = '/';
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      }
+    });
+
+    // --- Toast ---
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+
+    // --- Drag and drop image support ---
+    quill.root.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        await uploadAndInsertImage(file);
+      }
+    });
+
+    quill.root.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

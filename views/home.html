@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Guides</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+      User Guides
+    </a>
+    <div class="navbar-actions" id="navActions"></div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>All Guides</h1>
+      <div id="headerActions"></div>
+    </div>
+    <div class="guide-grid">
+      {{guideList}}
+    </div>
+  </div>
+
+  <script>
+    const isAdmin = {{isAdmin}};
+    if (isAdmin) {
+      document.getElementById('navActions').innerHTML = `
+        <a href="/admin/guide/new" class="btn btn-primary btn-sm">+ New Guide</a>
+        <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+      `;
+    } else {
+      document.getElementById('navActions').innerHTML = `
+        <a href="/admin/login" class="btn btn-secondary btn-sm">Admin Login</a>
+      `;
+    }
+  </script>
+</body>
+</html>
