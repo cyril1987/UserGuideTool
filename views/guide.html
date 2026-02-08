@@ -45,17 +45,19 @@
       `;
     }
 
-    // Generate a text-based ID from heading text (matches search engine anchor format)
+    // Generate a text-based ID from heading text
     function textToAnchorId(text) {
       return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
     }
+
+    // Alias map: alternative IDs → heading element (for deep-link matching)
+    const anchorAliases = {};
 
     // Generate TOC from headings (supports h2, h3, and custom .section-heading, .sub-heading, .sub2-heading)
     function buildToc() {
       const content = document.getElementById('guideContent');
       const toc = document.getElementById('tocList');
-      // Select both standard headings and custom heading classes
-      const headings = content.querySelectorAll('h2, h3, .section-heading, .sub-heading, .sub2-heading');
+      const headings = content.querySelectorAll('h2, h3, h4, .section-heading, .sub-heading, .sub2-heading');
 
       if (headings.length === 0) {
         document.getElementById('sidebar').style.display = 'none';
@@ -68,26 +70,51 @@
         if (seen.has(heading)) return;
         seen.add(heading);
 
-        // Generate text-based ID so search deep links work
-        const baseId = textToAnchorId(heading.textContent);
-        let anchorId = baseId || 'section-' + i;
-        // Ensure uniqueness
-        if (usedIds.has(anchorId)) {
-          let c = 2;
-          while (usedIds.has(anchorId + '-' + c)) c++;
-          anchorId = anchorId + '-' + c;
+        // Preserve the original content ID if it exists
+        const origId = heading.id || '';
+
+        // Generate text-based ID from textContent (what browser sees)
+        const textId = textToAnchorId(heading.textContent);
+
+        // Also generate a "clean" ID stripping leading numbers (for search matches)
+        const cleanText = heading.textContent.replace(/^\d+[\.\s]*/g, '').trim();
+        const cleanId = textToAnchorId(cleanText);
+
+        // Also simulate how stripHtml works (replaces tags with spaces)
+        // This handles <span class="num">3</span>Text → "3 text" → "3-text"
+        const innerHtml = heading.innerHTML;
+        const stripHtmlText = innerHtml.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+        const stripHtmlId = textToAnchorId(stripHtmlText);
+
+        // Pick the primary ID: prefer original content ID, then text-based
+        let primaryId;
+        if (origId && origId !== '') {
+          primaryId = origId;
+        } else {
+          primaryId = textId || 'section-' + i;
+          if (usedIds.has(primaryId)) {
+            let c = 2;
+            while (usedIds.has(primaryId + '-' + c)) c++;
+            primaryId = primaryId + '-' + c;
+          }
         }
-        usedIds.add(anchorId);
-        heading.id = anchorId;
+        usedIds.add(primaryId);
+        heading.id = primaryId;
+
+        // Register all alternative IDs as aliases pointing to this heading
+        [textId, cleanId, stripHtmlId, origId].forEach(aid => {
+          if (aid && aid !== primaryId && aid.length > 1) {
+            anchorAliases[aid] = heading;
+          }
+        });
 
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = '#' + heading.id;
         a.textContent = heading.textContent.replace(/^\d+\s*/, '').substring(0, 60);
 
-        // Determine depth for indentation
         const isSubHeading = heading.classList.contains('sub-heading') || heading.tagName === 'H3';
-        const isSub2Heading = heading.classList.contains('sub2-heading');
+        const isSub2Heading = heading.classList.contains('sub2-heading') || heading.tagName === 'H4';
         if (isSub2Heading) {
           a.className = 'toc-h3';
           a.style.paddingLeft = '36px';
@@ -127,22 +154,62 @@
       const hash = decodeURIComponent(window.location.hash.substring(1));
       if (!hash) return;
 
-      // Try exact ID match first
-      let target = document.getElementById(hash);
+      let target = null;
 
-      // If no exact match, try fuzzy matching against heading IDs
+      // 1. Exact ID match
+      target = document.getElementById(hash);
+
+      // 2. Check alias map (covers text-based, clean, and stripHtml variants)
+      if (!target && anchorAliases[hash]) {
+        target = anchorAliases[hash];
+      }
+
+      // 3. Partial/prefix match against heading IDs and aliases
       if (!target) {
-        const allHeadings = document.querySelectorAll('#guideContent h2, #guideContent h3, #guideContent .section-heading, #guideContent .sub-heading, #guideContent .sub2-heading');
+        const allHeadings = document.querySelectorAll('#guideContent h2, #guideContent h3, #guideContent h4, #guideContent .section-heading, #guideContent .sub-heading, #guideContent .sub2-heading');
+        // Try: heading ID contains the hash, or hash contains heading ID
         for (const h of allHeadings) {
-          if (h.id && (h.id === hash || h.id.startsWith(hash))) {
+          if (!h.id) continue;
+          if (h.id.includes(hash) || hash.includes(h.id)) {
             target = h;
             break;
+          }
+        }
+        // Try: alias contains the hash
+        if (!target) {
+          for (const [aid, el] of Object.entries(anchorAliases)) {
+            if (aid.includes(hash) || hash.includes(aid)) {
+              target = el;
+              break;
+            }
+          }
+        }
+      }
+
+      // 4. Last resort: fuzzy match — strip numbers/dashes and compare
+      if (!target) {
+        const normalize = s => s.replace(/[\d-]/g, '').toLowerCase();
+        const normHash = normalize(hash);
+        if (normHash.length > 2) {
+          const allHeadings = document.querySelectorAll('#guideContent h2, #guideContent h3, #guideContent h4, #guideContent .section-heading, #guideContent .sub-heading, #guideContent .sub2-heading');
+          for (const h of allHeadings) {
+            if (h.id && normalize(h.id) === normHash) {
+              target = h;
+              break;
+            }
+          }
+          if (!target) {
+            for (const [aid, el] of Object.entries(anchorAliases)) {
+              if (normalize(aid) === normHash) {
+                target = el;
+                break;
+              }
+            }
           }
         }
       }
 
       if (target) {
-        // Small delay to let page render fully
         setTimeout(() => {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           // Highlight the section briefly

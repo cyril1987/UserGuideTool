@@ -402,40 +402,81 @@ function smartSearch(guides, rawQuery) {
   return scoredResults.slice(0, 10);
 }
 
+// --- Helper: simulate browser .textContent (strips tags without adding spaces) ---
+function textContent(html) {
+  return html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&[^;]+;/g, ' ').trim();
+}
+
+// --- Generate anchor ID matching what guide viewer produces ---
+function toAnchorId(text) {
+  return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
+}
+
 // --- Extract section-level matches ---
 function extractSections(guide, tokenData, matchedTerms, queryLower) {
   const sections = [];
   if (!guide.content) return sections;
 
-  const headingRegex = /<(h[1-4]|div\s+class="[^"]*(?:section-heading|sub-heading|sub2-heading)[^"]*")[^>]*>([\s\S]*?)<\/(?:h[1-4]|div)>/gi;
-  let match;
+  // Match full opening tag to capture id attribute, then content
+  const headingRegex = /<(h[1-4]|div)\s+[^>]*(?:class="[^"]*(?:section-heading|sub-heading|sub2-heading)[^"]*"|(?=))[^>]*>([\s\S]*?)<\/(?:h[1-4]|div)>/gi;
+  // Also match plain h2/h3 without class
+  const plainHeadingRegex = /<(h[2-3])(?:\s[^>]*)?>([^<](?:[\s\S]*?))<\/\1>/gi;
 
-  while ((match = headingRegex.exec(guide.content)) !== null) {
-    const headingText = stripHtml(match[2]);
-    if (!headingText) continue;
+  // Collect all headings with their full opening tag (for id extraction)
+  const allHeadingMatches = [];
+  const fullTagRegex = /<(h[1-4])(\s[^>]*)?>(([\s\S]*?))<\/\1>/gi;
+  let m;
+  while ((m = fullTagRegex.exec(guide.content)) !== null) {
+    const tag = m[1];
+    const attrs = m[2] || '';
+    const inner = m[3];
 
-    // Get section content
-    const afterPos = match.index + match[0].length;
-    const nextHeading = guide.content.indexOf('<h', afterPos);
-    const nextDiv = guide.content.indexOf('<div class="section-heading', afterPos);
+    // Extract existing id attribute from the tag
+    const idMatch = attrs.match(/id="([^"]+)"/);
+    const origId = idMatch ? idMatch[1] : '';
+
+    // Get heading text two ways:
+    // 1. textContent style (what browser sees) — strips tags without spaces
+    const browserText = textContent(inner);
+    // 2. stripHtml style (replaces tags with spaces)
+    const searchText = stripHtml(inner);
+
+    if (!browserText && !searchText) continue;
+    const displayText = searchText || browserText;
+
+    allHeadingMatches.push({
+      heading: displayText,
+      browserText,
+      origId,
+      index: m.index,
+      fullLength: m[0].length,
+      inner
+    });
+  }
+
+  for (let i = 0; i < allHeadingMatches.length; i++) {
+    const hm = allHeadingMatches[i];
+    if (!hm.heading) continue;
+
+    // Get section content (until next heading)
+    const afterPos = hm.index + hm.fullLength;
     let endPos = guide.content.length;
-    if (nextHeading > 0 && nextHeading < endPos) endPos = nextHeading;
-    if (nextDiv > 0 && nextDiv < endPos) endPos = nextDiv;
+    if (i + 1 < allHeadingMatches.length) {
+      endPos = allHeadingMatches[i + 1].index;
+    }
     const sectionContent = stripHtml(guide.content.substring(afterPos, Math.min(afterPos + 500, endPos)));
 
-    const sectionText = (headingText + ' ' + sectionContent).toLowerCase();
+    const sectionText = (hm.heading + ' ' + sectionContent).toLowerCase();
 
-    // Check if any token (original, stemmed, synonym, or matched term) hits this section
+    // Check if any token hits this section
     let sectionMatched = false;
     let bestMatchTerm = '';
 
-    // Check exact query
     if (sectionText.includes(queryLower)) {
       sectionMatched = true;
       bestMatchTerm = queryLower;
     }
 
-    // Check individual tokens and their expansions
     if (!sectionMatched) {
       for (const td of tokenData) {
         if (sectionText.includes(td.original)) {
@@ -459,7 +500,6 @@ function extractSections(guide, tokenData, matchedTerms, queryLower) {
       }
     }
 
-    // Check matched terms from fuzzy matching
     if (!sectionMatched) {
       for (const mt of matchedTerms) {
         if (sectionText.includes(mt)) {
@@ -472,8 +512,8 @@ function extractSections(guide, tokenData, matchedTerms, queryLower) {
 
     if (!sectionMatched) continue;
 
-    // Build snippet around the match
-    const fullText = headingText + ' \u2014 ' + sectionContent;
+    // Build snippet
+    const fullText = hm.heading + ' \u2014 ' + sectionContent;
     const idx = fullText.toLowerCase().indexOf(bestMatchTerm);
     let snippet = '';
     if (idx >= 0) {
@@ -484,9 +524,17 @@ function extractSections(guide, tokenData, matchedTerms, queryLower) {
       snippet = sectionContent.substring(0, 120) + (sectionContent.length > 120 ? '...' : '');
     }
 
-    const anchorId = headingText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 60);
+    // Generate anchor ID — use the original content id if available (this is what the
+    // guide viewer will keep as the primary ID). Otherwise generate from textContent.
+    let anchorId;
+    if (hm.origId) {
+      anchorId = hm.origId;
+    } else {
+      // Match browser textContent behavior (no spaces from stripped tags)
+      anchorId = toAnchorId(hm.browserText);
+    }
 
-    sections.push({ heading: headingText, snippet, anchorId });
+    sections.push({ heading: hm.heading, snippet, anchorId });
   }
 
   return sections;
