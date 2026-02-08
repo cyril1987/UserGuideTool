@@ -1,0 +1,842 @@
+<!-- OVERVIEW -->
+<div class="overview-panel" id="overview">
+<h3>System Overview</h3>
+<p>The Invoice Processing system provides end-to-end management of vendor and customer invoices. Here is an overview of the key modules you will work with:</p>
+<div class="overview-grid">
+<div class="overview-item"><div class="oi-icon blue">&#x1F50D;</div><div class="oi-text"><h4>Invoice Search</h4><p>Find any invoice using flexible filters — by type, date, status, amount, or custom parameters.</p></div></div>
+<div class="overview-item"><div class="oi-icon green">&#x2705;</div><div class="oi-text"><h4>Workflow Approval</h4><p>Multi-level approval queues. Assign, review, approve, or request changes on invoices.</p></div></div>
+<div class="overview-item"><div class="oi-icon purple">&#x1F517;</div><div class="oi-text"><h4>Reconciliation</h4><p>Match billed amounts (LIDs) against expected amounts (EBLs) to catch discrepancies.</p></div></div>
+<div class="overview-item"><div class="oi-icon amber">&#x1F4CA;</div><div class="oi-text"><h4>Accounting</h4><p>Automatic account resolution, posting, and error handling. View or change account segments.</p></div></div>
+<div class="overview-item"><div class="oi-icon red">&#x274C;</div><div class="oi-text"><h4>Rejection Handling</h4><p>Full/partial rejection, outstanding rejection documents, and credit note processing.</p></div></div>
+<div class="overview-item"><div class="oi-icon blue">&#x1F4CB;</div><div class="oi-text"><h4>Reports</h4><p>Generate unapproved, approved, workflow trail, reconciliation, detail, and expense reports.</p></div></div>
+</div>
+</div>
+
+<!-- Lifecycle Diagram -->
+<div class="concept-box">
+<h4>Typical Invoice Lifecycle</h4>
+<p>Understanding the end-to-end flow helps you know where each action fits:</p>
+<div class="flow-diagram" style="margin-top:14px;">
+<div class="flow-step">Invoice<br>Loaded</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Enters<br>Workflow</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Reconciliation<br>&amp; Review</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Approve /<br>Reject</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Accounting<br>Posted</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step" style="background:#dcfce7;color:#166534;border-color:#86efac;">FINAL<br>Status</div>
+</div>
+<p style="margin-top:12px; font-size:13px;">If rejected, an <strong>Outstanding Rejection</strong> document is created which requires further action (reversal, closure, or credit note linking).</p>
+</div>
+
+<!-- SECTION 1 -->
+<h2 class="section-heading" id="sec1"><span class="num">1</span>Logging In &amp; Accessing Invoices</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> How to log into the system and navigate to the Invoices module. This is your starting point for all invoice-related tasks.
+</div>
+<div class="card">
+<ol class="steps">
+<li><strong>Open the login page</strong> — Launch your web browser and navigate to the system URL provided by your administrator.</li>
+<li><strong>Enter credentials</strong> — Input your username and password.</li>
+<li><strong>Click "Login"</strong> — You'll be taken to the main dashboard.</li>
+</ol>
+<img src="images/image1.png" alt="Login page screenshot" style="max-width:90%; border-radius:8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);" loading="lazy">
+</div>
+<div class="card">
+<ol class="steps">
+<li><strong>Access the side menu</strong> — Hover your cursor over the left-hand side menu tab to expand it.
+<img src="images/image2.png" alt="Side menu" style="max-width:80%;" loading="lazy">
+</li>
+<li><strong>Select "Invoices"</strong> — Find and click the "Invoices" section from the main navigation.
+<img src="images/image3.png" alt="Invoices menu" style="max-width:40%;" loading="lazy">
+</li>
+</ol>
+<div class="callout info">
+<span class="callout-icon">&#x1F4A1;</span>
+<div>
+<strong>Invoices Options:</strong> Within the "Invoices" section, you'll find three options:
+<strong>Search</strong> (find and view invoices), <strong>Transformation Setup</strong> (configuration), and <strong>OBL Invoice Creation</strong> (create outbound invoices). Most daily tasks begin with <strong>Search</strong>.
+</div>
+</div>
+<img src="images/image4.png" alt="Invoice options" style="max-width:36%;" loading="lazy">
+</div>
+
+<!-- SECTION 2 -->
+<h2 class="section-heading" id="sec2"><span class="num">2</span>Invoice Types</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> The two main categories of invoices in the system and when to use each.
+</div>
+<div class="card">
+<p>Inside the "Search" page, two main tabs determine which invoices you see:</p>
+<img src="images/image5.png" alt="Invoice type tabs" style="max-width:50%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Type</th><th>Description</th><th>In Short</th></tr></thead>
+<tbody>
+<tr><td><strong>Vendor Invoice</strong></td><td>All invoices received from external vendors, including rejections and correspondences of these invoices.</td><td><span class="status red">Payables</span></td></tr>
+<tr><td><strong>Customer Invoice</strong></td><td>All invoices sent to other vendors from the client organization or their subsidiaries, including correspondences.</td><td><span class="status green">Receivables</span></td></tr>
+</tbody>
+</table>
+<div class="callout tip">
+<span class="callout-icon">&#x2705;</span>
+<div><strong>Tip:</strong> If you're looking for money you need to <em>pay</em>, go to Vendor Invoice. If you're looking for money <em>owed to you</em>, go to Customer Invoice.</div>
+</div>
+</div>
+
+<!-- SECTION 3 -->
+<h2 class="section-heading" id="sec3"><span class="num">3</span>Invoice Search</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> How to use the powerful search system to find any invoice — whether it's in the workflow or already processed.
+</div>
+<div class="card">
+<img src="images/image6.png" alt="Invoice search screen" style="max-width:100%;" loading="lazy">
+<p><strong>Three ways to search:</strong></p>
+<table class="compare-table">
+<thead><tr><th>Search Method</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td><strong>Quick Search</strong></td><td>Filtering by invoice type or workflow status for fast results.</td></tr>
+<tr><td><strong>Date Search</strong></td><td>Finding invoices by creation date, due date, or service date range.</td></tr>
+<tr><td><strong>Filter Search</strong></td><td>Combining multiple criteria (amount, account status, area, etc.) for precision.</td></tr>
+</tbody>
+</table>
+<p>Click on the search bar to reveal all filter options:</p>
+<img src="images/image7.png" alt="Search filters" style="max-width:100%;" loading="lazy">
+</div>
+<div class="card">
+<p><strong>Key Search Fields Explained:</strong></p>
+<table class="compare-table">
+<thead><tr><th>Field</th><th>Purpose</th><th>Bilateral?</th></tr></thead>
+<tbody>
+<tr><td><strong>Charge Code</strong></td><td>SIS-specific code for categorizing charges</td><td><span class="status amber">SIS Only</span></td></tr>
+<tr><td><strong>Area Type / Area Value</strong></td><td>Geographic or organizational area filter.</td><td><span class="status green">Yes</span></td></tr>
+<tr><td><strong>Settlement Month / Period</strong></td><td>SIS settlement period filter</td><td><span class="status amber">SIS Only</span></td></tr>
+<tr><td><strong>Account Posting Status</strong></td><td>Filter by accounting state (e.g., find all invoices in "Error" state)</td><td><span class="status green">Yes</span></td></tr>
+<tr><td><strong>Amount Range / Currency</strong></td><td>Find invoices by amount threshold in base or invoice currency</td><td><span class="status green">Yes</span></td></tr>
+</tbody>
+</table>
+<p>For more parameters, click <strong>'Show More Options'</strong>:</p>
+<img src="images/image8.png" alt="Full search options" style="max-width:100%;" loading="lazy">
+</div>
+<div class="card">
+<div class="callout info">
+<span class="callout-icon">&#x2139;&#xFE0F;</span>
+<div><strong>Search Actions:</strong> After populating fields, click <strong>"Apply"</strong> to search. Use <strong>"Reset"</strong> to clear all parameters, or <strong>"Hide Options"</strong> to collapse the filter panel.</div>
+</div>
+<img src="images/image9.png" alt="Apply and reset buttons" style="max-width:68%;" loading="lazy">
+<p><strong>Search results</strong> appear as a table listing all matching invoices:</p>
+<img src="images/image10.png" alt="Search results" style="max-width:100%;" loading="lazy">
+</div>
+
+<!-- SECTION 4 -->
+<h2 class="section-heading" id="sec4"><span class="num">4</span>Invoice Screen Actions</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> Quick actions available on any invoice from the search results — viewing attachments, checking workflow history, and re-triggering accounting.
+</div>
+<div class="card">
+<p>Click the <strong>&#x22EF; (three dots)</strong> menu on any invoice to reveal available actions:</p>
+<img src="images/image11.png" alt="Invoice actions menu" style="max-width:42%;" loading="lazy">
+</div>
+
+<h3 class="sub-heading" id="sec4-1">4.1 View Attachments</h3>
+<div class="card">
+<p>Click <strong>"Attachments"</strong> to see all files loaded with the invoice. You can also upload new documents by clicking <strong>"Add Attachment"</strong>.</p>
+<img src="images/image12.png" alt="Attachments list" style="max-width:100%;" loading="lazy">
+<p>If no attachments exist, the upload interface appears directly:</p>
+<img src="images/image13.png" alt="Upload attachment" style="max-width:80%;" loading="lazy">
+<div class="callout tip">
+<span class="callout-icon">&#x1F4CE;</span>
+<div><strong>Best practice:</strong> Always attach supporting documents (purchase orders, delivery receipts, vendor correspondence) to invoices for audit trail purposes.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec4-2">4.2 View Invoice Workflow Trail</h3>
+<div class="card">
+<p>The <strong>Workflow Trail</strong> is your audit log — it shows every action taken on the invoice, who performed it, and when.</p>
+<img src="images/image14.png" alt="Workflow trail" style="max-width:68%;" loading="lazy">
+<div class="callout info">
+<span class="callout-icon">&#x1F4DD;</span>
+<div>The trail includes timestamps, user names, action types (approved, rejected, assigned, etc.), and any remarks entered during processing.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec4-3">4.3 Re-trigger Accounting</h3>
+<div class="card">
+<p>Use <strong>"Retrigger Accounting"</strong> when you need the system to recalculate an invoice's accounting — for example, after changing account values or fixing errors.</p>
+<div class="callout warn">
+<span class="callout-icon">&#x23F3;</span>
+<div><strong>Note:</strong> Processing time depends on invoice size. After triggering, return to the page later and refresh to check the updated accounting section.</div>
+</div>
+</div>
+
+<!-- SECTION 5 -->
+<h2 class="section-heading" id="sec5"><span class="num">5</span>Invoice Workflow</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> The Invoice Workflow is the core of the system where active invoices are assigned, reviewed, reconciled, approved, or rejected.
+</div>
+
+<div class="concept-box">
+<h4>Understanding Workflow</h4>
+<p>Think of the workflow as an <strong>inbox of pending invoices</strong>. New invoices enter the workflow, get assigned to users for review, and eventually get approved (moving to FINAL status) or rejected (creating an outstanding rejection document).</p>
+<div class="flow-diagram" style="margin-top:12px;">
+<div class="flow-step">Invoice<br>Arrives</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Assigned<br>to User</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Review &amp;<br>Reconcile</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step" style="background:#dcfce7;color:#166534;border-color:#86efac;">Approve</div>
+</div>
+<p style="text-align:center; font-size:12px; color:#94a3b8; margin-top:4px;">or</p>
+<div class="flow-diagram">
+<div class="flow-step">Review &amp;<br>Reconcile</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;">Reject</div>
+<span class="flow-arrow">&rarr;</span>
+<div class="flow-step">Outstanding<br>Rejection</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-1">5.1 Dashboard</h3>
+<div class="card">
+<p>Navigate to <strong>Workflow &rarr; Dashboard</strong> from the side menu:</p>
+<img src="images/image15.png" alt="Workflow menu" style="max-width:40%;" loading="lazy">
+<img src="images/image16.png" alt="Workflow dashboard" style="max-width:100%;" loading="lazy">
+<p>The dashboard processes four document types — select using the tabs at top right:</p>
+<img src="images/image17.png" alt="Document type tabs" style="max-width:80%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Tab</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><strong>Contracts</strong></td><td>Pending contract approvals</td></tr>
+<tr><td><strong>Invoices</strong></td><td>Pending invoice approvals (most common)</td></tr>
+<tr><td><strong>Service Request</strong></td><td>Service-related requests</td></tr>
+<tr><td><strong>Service Form</strong></td><td>Completed service forms for approval</td></tr>
+</tbody>
+</table>
+</div>
+<div class="card">
+<p><strong>Dashboard Panels:</strong></p>
+<img src="images/image18.png" alt="Dashboard sections" style="max-width:30%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Panel</th><th>What It Shows</th></tr></thead>
+<tbody>
+<tr><td><strong>All Docs</strong></td><td>Every document in the workflow across all users</td></tr>
+<tr><td><strong>My Docs</strong></td><td>Only documents assigned to you — <em>your daily work queue</em></td></tr>
+<tr><td><strong>Workflow Queue</strong></td><td>Configured queues with document counts and your assigned count</td></tr>
+<tr><td><strong>Exception Queue</strong></td><td>Documents not matching any configured queue (requires attention)</td></tr>
+</tbody>
+</table>
+<p><strong>Searching within a queue:</strong> Use the filter bar and Group option to organize documents:</p>
+<img src="images/image19.png" alt="Search and filter" style="max-width:100%;" loading="lazy">
+</div>
+
+<h3 class="sub-heading" id="sec5-2">5.2 Invoice Workflow Queue</h3>
+<div class="card">
+<p>Each queue can have <strong>single or multiple approval levels</strong>, shown on the right side:</p>
+<img src="images/image22.png" alt="Workflow levels" style="max-width:26%;" loading="lazy">
+<div class="concept-box">
+<h4>Single vs. Multi-Level Approval</h4>
+<table class="compare-table">
+<thead><tr><th>Type</th><th>How It Works</th><th>Status After Approval</th></tr></thead>
+<tbody>
+<tr><td><strong>Single Level</strong></td><td>One approval moves the document out of workflow</td><td><span class="status green">FINAL</span></td></tr>
+<tr><td><strong>Multi-Level</strong></td><td>Must be approved at each level sequentially</td><td><span class="status blue">Under Review</span> &rarr; ... &rarr; <span class="status green">FINAL</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-3">5.3 Invoice Workflow Dashboard Actions</h3>
+<div class="card">
+<p>Three action buttons appear next to each document:</p>
+<img src="images/image23.png" alt="Action buttons" style="max-width:28%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Button</th><th>Icon</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>View</strong></td><td>Eye</td><td>Opens the document for review (read-only if not assigned to you)</td></tr>
+<tr><td><strong>Workflow Trail</strong></td><td>Trail</td><td>Shows complete action history of the document</td></tr>
+<tr><td><strong>Assign to Me</strong></td><td>Person</td><td>Claims the document for your processing — <em>required before you can approve</em></td></tr>
+</tbody>
+</table>
+<div class="callout warn">
+<span class="callout-icon">&#x26A0;&#xFE0F;</span>
+<div><strong>Important:</strong> You must assign a document to yourself <em>before</em> you can process (approve/reject) it. Viewing without assignment is read-only.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-4">5.4 Invoice Processing</h3>
+
+<h4 class="sub2-heading" id="sec5-4-1">5.4.1 View Workflow Trail</h4>
+<div class="card">
+<p>The workflow trail is a <strong>chronological audit log</strong> showing every action from invoice loading to the current state.</p>
+<ol class="steps">
+<li><strong>Open the workflow dashboard</strong></li>
+<li><strong>Click the workflow trail button</strong> on any invoice
+<img src="images/image24.png" alt="Workflow trail icon" style="max-width:22%;" loading="lazy">
+</li>
+<li><strong>Review the trail</strong> — Each entry shows the action, user, timestamp, and any remarks
+<img src="images/image25.png" alt="Workflow trail view" style="max-width:66%;" loading="lazy">
+</li>
+</ol>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-2">5.4.2 Approve a Document</h4>
+<div class="card">
+<ol class="steps">
+<li><strong>Open the workflow dashboard</strong>
+<img src="images/image26.png" alt="Dashboard view" style="max-width:100%;" loading="lazy">
+</li>
+<li><strong>Click "View Document"</strong> in the Actions column. The document must already be assigned to you.
+<img src="images/image27.png" alt="View document" style="max-width:82%;" loading="lazy">
+</li>
+<li><strong>Choose an action</strong> — The system presents <strong>Process</strong> or <strong>Cancel</strong>:
+<img src="images/image29.png" alt="Process or Cancel" style="max-width:78%;" loading="lazy">
+</li>
+</ol>
+<table class="compare-table">
+<thead><tr><th>Action</th><th>Result</th><th>What Happens Next</th></tr></thead>
+<tbody>
+<tr><td><strong>Process</strong></td><td><span class="status green">Approved</span></td><td>Status &rarr; FINAL (single level) or Under Review (multi-level)</td></tr>
+<tr><td><strong>Cancel</strong></td><td><span class="status red">Cancelled</span></td><td>Invoice is removed from workflow entirely</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-3">5.4.3 View Invoice in Workflow</h4>
+<div class="card">
+<p>When viewing an invoice in workflow, you'll see several key sections:</p>
+<h4 style="margin-top:18px; font-size:15px; color:#1d4ed8;">Invoice Header</h4>
+<img src="images/image30.png" alt="Invoice header" style="max-width:100%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Feature</th><th>How to Access</th><th>What You Can Do</th></tr></thead>
+<tbody>
+<tr><td><strong>Vendor/Customer Details</strong></td><td>Hover on the vendor name text</td><td>View full contact and entity details</td></tr>
+<tr><td><strong>Due Date</strong></td><td>Click "Edit" next to payment date</td><td>Change the payment baseline date</td></tr>
+<tr><td><strong>Tax/VAT/Addons</strong></td><td>Click on the amount value</td><td>View header and LID-level tax breakdown</td></tr>
+<tr><td><strong>Attachments &amp; Trail</strong></td><td>Click icons in the header bar</td><td>View/add attachments, view workflow history</td></tr>
+<tr><td><strong>Header Notes</strong></td><td>Click "Edit" in notes section</td><td>Add internal notes visible to all reviewers</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">Invoice Service Summary</h4>
+<p>A summary of all services on the invoice with their totals, plus a <strong>historical billing graph</strong> showing up to 5 previous billings of the same category.</p>
+<img src="images/image38.png" alt="Service summary" style="max-width:100%;" loading="lazy">
+</div>
+
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">Invoice Reconciliation Summary</h4>
+<p>This is one of the most critical sections — it shows how billed amounts (LIDs) compare against expected amounts (EBLs).</p>
+<img src="images/image40.png" alt="Recon summary" style="max-width:88%;" loading="lazy">
+
+<div class="concept-box">
+<h4>Understanding Reconciliation Statuses</h4>
+<table class="compare-table">
+<thead><tr><th>Status</th><th>Badge</th><th>What It Means</th><th>Action Needed?</th></tr></thead>
+<tbody>
+<tr><td>Unreconciled</td><td><span class="status red">Unreconciled</span></td><td>No matching EBL found for this LID</td><td>Yes — investigate or manually link</td></tr>
+<tr><td>Over-Billed</td><td><span class="status amber">Over-Billed</span></td><td>LID amount exceeds the matched EBL</td><td>Yes — consider rejection</td></tr>
+<tr><td>Under-Billed</td><td><span class="status blue">Under-Billed</span></td><td>LID amount is less than the matched EBL</td><td>Usually not — vendor billed less</td></tr>
+<tr><td>Tol-Matched</td><td><span class="status green">Tol-Matched</span></td><td>Difference is within configured tolerance</td><td>No — acceptable variance</td></tr>
+<tr><td>Matched</td><td><span class="status green">Matched</span></td><td>LID and EBL amounts are exactly equal</td><td>No — perfect match</td></tr>
+<tr><td>Recon-Exempt</td><td><span class="status purple">Recon-Exempt</span></td><td>Unreconciled but below exempt threshold</td><td>No — below configured threshold</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>Key metrics in this section:</strong></p>
+<ul class="bullets">
+<li><strong>LID Count:</strong> Number of line items in each status category</li>
+<li><strong>Billed Amount:</strong> What the vendor invoiced (LID amount)</li>
+<li><strong>Expected Amount:</strong> What your system expected (EBL amount)</li>
+</ul>
+</div>
+
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">Reconciliation Visual Graphs</h4>
+<p>Two visual graphs provide at-a-glance insight into reconciliation health:</p>
+<p><strong>Service Wise Reconciled LIDs</strong> — Shows which services have unreconciled amounts that need attention:</p>
+<img src="images/image50.png" alt="Service wise recon graph" style="max-width:68%;" loading="lazy">
+<p><strong>Top Reasons of Overbilling</strong> — Highlights the primary drivers of overbilling disputes:</p>
+<img src="images/image51.png" alt="Overbilling reasons graph" style="max-width:72%;" loading="lazy">
+<div class="callout tip">
+<span class="callout-icon">&#x1F4A1;</span>
+<div><strong>Pro tip:</strong> Use these graphs to quickly prioritize which services to investigate first. Hover on chart segments for exact amounts.</div>
+</div>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-4">5.4.4 Invoice Accounting</h4>
+<div class="card">
+<p>Scroll down to the Accounting section for the invoice's financial posting details:</p>
+<img src="images/image52.png" alt="Accounting section" style="max-width:100%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>View</th><th>Shows</th><th>Key Info</th></tr></thead>
+<tbody>
+<tr><td><strong>Posting Summary</strong></td><td>ERP posting status</td><td><span class="status green">POSTED</span> or <span class="status amber">DRAFT</span> + amounts in posting currency</td></tr>
+<tr><td><strong>Accounting Summary</strong></td><td>System accounting amounts</td><td>Amounts in accounting currency + account resolution status (<span class="status green">Resolved</span> or <span class="status red">Error</span>)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-5">5.4.5 View Invoice Accounting Errors</h4>
+<div class="card">
+<p>When account resolution fails, you'll see "Error" in the status. Here's how to diagnose and fix:</p>
+<ol class="steps">
+<li><strong>Click "View Errors"</strong> at the top right of the accounting card
+<img src="images/image60.png" alt="View errors button" style="max-width:40%;" loading="lazy">
+</li>
+<li><strong>Review the Accounting Errors section</strong>
+<img src="images/image61.png" alt="Accounting errors" style="max-width:100%;" loading="lazy">
+</li>
+<li><strong>Select the Error Group</strong> to narrow down
+<img src="images/image62.png" alt="Error group" style="max-width:28%;" loading="lazy">
+</li>
+<li><strong>Select the account type</strong>
+<img src="images/image63.png" alt="Account type" style="max-width:56%;" loading="lazy">
+</li>
+<li><strong>View the error reason</strong> and click <strong>"Change Account Value"</strong> to fix
+<img src="images/image64.png" alt="Change account value" style="max-width:100%;" loading="lazy">
+</li>
+<li><strong>Re-trigger accounting</strong> after making changes</li>
+</ol>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-6">5.4.6 View Invoice Accounting Details</h4>
+<div class="card">
+<ol class="steps">
+<li>Navigate to top of page &rarr; <strong>'Invoice Summary'</strong></li>
+<li>Scroll to accounting section &rarr; <strong>'View Details'</strong></li>
+<li>Click any <strong>'Account Type'</strong> to explore
+<img src="images/image68.png" alt="Account types" style="max-width:100%;" loading="lazy">
+</li>
+<li>Select an <strong>account segment</strong>
+<img src="images/image69.png" alt="Account segments" style="max-width:72%;" loading="lazy">
+</li>
+<li>Click an <strong>account line</strong> for full details</li>
+<li>Use <strong>"Search"</strong> by date if there are many lines</li>
+</ol>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-7">5.4.7 Change Invoice Accounts</h4>
+<div class="card">
+<ol class="steps">
+<li>Select an LID line &rarr; click <strong>"Change Account"</strong>
+<img src="images/image72.png" alt="Change account button" style="max-width:100%;" loading="lazy">
+</li>
+<li>Enter new Account Details &rarr; click <strong>"Save"</strong>
+<img src="images/image73.png" alt="Save new account" style="max-width:100%;" loading="lazy">
+</li>
+</ol>
+<div class="callout warn">
+<span class="callout-icon">&#x26A0;&#xFE0F;</span>
+<div>After changing accounts, always <strong>re-trigger accounting</strong> (Section 4.3) for the changes to take effect in the ERP.</div>
+</div>
+</div>
+
+<h4 class="sub2-heading" id="sec5-4-8">5.4.8 Split Invoice Accounts</h4>
+<div class="card">
+<p>Splitting allows you to distribute an invoice line's expense across multiple accounts:</p>
+<ol class="steps">
+<li>Return to <strong>"Invoice Summary"</strong> using breadcrumbs</li>
+<li>In accounting section, click the <strong>split button</strong>
+<img src="images/image75.png" alt="Split button" style="max-width:42%;" loading="lazy">
+</li>
+<li>Click <strong>'Split Account'</strong>
+<img src="images/image76.png" alt="Split account" style="max-width:100%;" loading="lazy">
+</li>
+<li>Enter the split amount — the system <strong>auto-deducts</strong> from the original account. Click <strong>"Submit"</strong>.
+<img src="images/image77.png" alt="Submit split" style="max-width:100%;" loading="lazy">
+</li>
+</ol>
+</div>
+
+<h3 class="sub-heading" id="sec5-5">5.5 View Invoice Recon Details</h3>
+<div class="card">
+<ol class="steps">
+<li>In the Recon Summary, click <strong>'View Details'</strong>
+<img src="images/image78.png" alt="View details" style="max-width:100%;" loading="lazy">
+</li>
+<li>Review the detailed reconciliation breakdown
+<img src="images/image79.png" alt="Recon details" style="max-width:100%;" loading="lazy">
+</li>
+</ol>
+<p><strong>Navigation within Recon Details:</strong></p>
+<ul class="bullets">
+<li><strong>Recon Status Groups:</strong> Click each group tab to filter results</li>
+<li><strong>Service Filter:</strong> Focus on a specific service</li>
+<li><strong>Reject Excess Billing:</strong> Available in Over-billed group — auto-rejects all over-billed LIDs</li>
+</ul>
+
+<p><strong>Recon Result Columns:</strong></p>
+<table class="compare-table">
+<thead><tr><th>Column</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Recon Status</strong></td><td>Color-coded status indicator</td></tr>
+<tr><td><strong>Recon Ratio</strong></td><td>LID:EBL match count (e.g., 1:2 means 1 LID matched 2 EBLs)</td></tr>
+<tr><td><strong>Recon Key</strong></td><td>The unique matching key (e.g., Service + Date + Flight No)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub-heading" id="sec5-6">5.6 Manually Change Recon Reason</h3>
+<div class="section-intro">Sometimes the system assigns an incorrect reconciliation reason. You can manually override it at the group level or for individual LIDs.</div>
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">Change for All LIDs in a Group</h4>
+<ol class="steps">
+<li>Click the <strong>change icon</strong> on the recon group header</li>
+<li>Select the correct reason and add comments explaining why</li>
+<li>Click <strong>'Confirm'</strong></li>
+</ol>
+
+<h4 style="margin-top:24px; font-size:15px; color:#1d4ed8;">Change for a Single LID</h4>
+<ol class="steps">
+<li>Click the recon reason group &rarr; select the specific LID</li>
+<li>Click <strong>"Change Reason Group"</strong></li>
+<li>Enter the correct reason and comments</li>
+<li>Click <strong>'Confirm'</strong></li>
+</ol>
+</div>
+
+<h3 class="sub-heading" id="sec5-7">5.7 Manual Linking and De-linking</h3>
+<div class="section-intro">When automated reconciliation can't match LIDs to EBLs, you can manually link or de-link them.</div>
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">Manual Linking</h4>
+<ol class="steps">
+<li>Click <strong>'Link'</strong> — System shows the LID details and available unlinked EBLs</li>
+<li>Use search filters to find the matching EBL</li>
+<li>Select the correct EBL &rarr; click <strong>'Confirm'</strong></li>
+</ol>
+
+<h4 style="margin-top:24px; font-size:15px; color:#dc2626;">Manual De-linking</h4>
+<ol class="steps">
+<li>Click <strong>'De-link'</strong> — System shows currently linked EBLs</li>
+<li>Select the EBL to de-link &rarr; click <strong>'Confirm'</strong></li>
+</ol>
+<div class="callout tip">
+<span class="callout-icon">&#x1F4A1;</span>
+<div>After linking or de-linking, use <strong>Re-trigger Recon</strong> to recalculate the reconciliation summary.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-7a">5.8 Invoice Auto Approvals</h3>
+<div class="card">
+<div class="concept-box">
+<h4>When Are Invoices Auto-Approved?</h4>
+<p>Not all invoices require manual approval. The system can auto-approve invoices when reconciliation results meet configured thresholds:</p>
+<p><strong>Tolerance Match at Recon Level:</strong> If a service has a configured tolerance (e.g., 2% for "Deicing Equipment"), LIDs within that range become "Tol-Matched". If <strong>Matched + Tol-Matched + Recon-Exempt = 100%</strong>, the invoice is automatically approved.</p>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-8">5.9 Amount Level Tolerance</h3>
+<div class="card">
+<p>A separate tolerance can be set at the <strong>total invoice amount level</strong>:</p>
+<div class="callout info">
+<span class="callout-icon">&#x1F4A1;</span>
+<div><strong>Example:</strong> If the system allows $200 tolerance and an invoice has $120 unreconciled + $50 overbilled (total variance = $170), it falls within the $200 threshold and is marked <strong>"Within Tolerance"</strong>.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-9">5.10 Sending a Document Back</h3>
+<div class="card">
+<p>For multi-level queues, a reviewer at a higher level can send an invoice back to the first level for corrections:</p>
+<ol class="steps">
+<li><strong>Open workflow dashboard</strong></li>
+<li><strong>Find an invoice on second level</strong> &rarr; click the eye icon</li>
+<li><strong>Click "Request Changes"</strong> at the bottom</li>
+<li><strong>Add instructions</strong> via comments &rarr; click <strong>'Save'</strong></li>
+</ol>
+<div class="callout info">
+<span class="callout-icon">&#x1F4DD;</span>
+<div>Your comments will appear in the workflow trail, so be specific about what needs to be fixed.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec5-10">5.11 Unapproved Invoices Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Unapproved Invoices</strong> from the sidebar:</p>
+<img src="images/image106.png" alt="Reports nav" style="max-width:36%;" loading="lazy">
+<p><strong>Report includes:</strong> Queue name, pending duration, load date, assigned user, and authorized approvers.</p>
+</div>
+
+<h3 class="sub-heading" id="sec5-11">5.12 Approved Invoices Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Approved Invoices Report</strong>:</p>
+<p><strong>Report includes:</strong> Approval date, approving user, workflow queue name, and invoice details.</p>
+</div>
+
+<h3 class="sub-heading" id="sec5-12">5.13 Workflow Trail Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Workflow Trail Report</strong>:</p>
+<p><strong>Report includes:</strong> Action date, user, action name, and invoice details — one row per action.</p>
+</div>
+
+<h3 class="sub-heading" id="sec5-13">5.14 Reconciliation Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Reconciliation Report</strong>:</p>
+<p><strong>Report includes:</strong> Service-wise recon values, recon status, mismatch reason, and difference amount (LID - EBL).</p>
+</div>
+
+<h3 class="sub-heading" id="sec5-14">5.15 Invoice Detail Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Invoice Detail Report</strong>:</p>
+<p><strong>Report includes:</strong> LID-level detail with header info, service details, additional parameters, and amounts.</p>
+</div>
+
+<h3 class="sub-heading" id="sec5-15">5.16 Expense Accounts Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Expense Account</strong>:</p>
+<p><strong>Report includes:</strong> Invoice details with account segment values.</p>
+</div>
+
+<!-- SECTION 6 -->
+<h2 class="section-heading" id="sec6"><span class="num">6</span>Rejecting a Bilateral Invoice</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> How to fully or partially reject a prime billing bilateral invoice. Rejections can be made at the full invoice level, line item level, or line item detail level.
+</div>
+
+<div class="concept-box">
+<h4>Rejection Levels at a Glance</h4>
+<table class="compare-table">
+<thead><tr><th>Level</th><th>Scope</th><th>When to Use</th></tr></thead>
+<tbody>
+<tr><td><strong>Full Reject</strong></td><td>Entire invoice</td><td>The whole invoice is disputed</td></tr>
+<tr><td><strong>Line Item (LI)</strong></td><td>One service category</td><td>A specific service is incorrect</td></tr>
+<tr><td><strong>Line Item Detail (LID)</strong></td><td>Individual charge line</td><td>A specific charge within a service is wrong</td></tr>
+<tr><td><strong>Excess Billing</strong></td><td>All over-billed LIDs</td><td>Auto-reject everything that exceeds expected amounts</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub-heading" id="sec6-1">6.1 Rejection from Invoice Service Summary</h3>
+<div class="card">
+<p>Open the invoice through workflow &rarr; click view icon:</p>
+<ul class="bullets">
+<li><strong>Full Reject</strong> — Rejects the entire invoice</li>
+<li><strong>LI Level Reject</strong> — Click the reject button at service level</li>
+<li><strong>LID Level from LID Summary</strong> — Click the reject tag at a specific LID</li>
+</ul>
+<p>The <strong>rejection form</strong> appears:</p>
+<img src="images/image125.png" alt="Rejection popup" style="max-width:72%;" loading="lazy">
+<table class="compare-table">
+<thead><tr><th>Field</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Rejection Amount</strong></td><td>Enter specific amount or click "Full Reject" for entire service</td></tr>
+<tr><td><strong>Tax</strong></td><td>Auto-calculated based on rejection amount</td></tr>
+<tr><td><strong>Rejection Reason</strong></td><td>Select from dropdown (stored at Line Item level)</td></tr>
+<tr><td><strong>Remarks</strong></td><td>Optional notes explaining the rejection</td></tr>
+</tbody>
+</table>
+<div class="callout info">
+<span class="callout-icon">&#x1F4CB;</span>
+<div>An <strong>Outstanding Rejection document</strong> is automatically created from the rejected services — see Section 8 for handling these.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec6-2">6.2 Reject Excess Billing from Reconciliation</h3>
+<div class="card">
+<ol class="steps">
+<li>Open invoice &rarr; go to <strong>Recon Summary &rarr; View Details</strong></li>
+<li>Click the <strong>'Over-billed'</strong> tab</li>
+<li>Click <strong>"Reject Excess Billing"</strong> — auto-rejects all over-billed LIDs</li>
+<li>Select reason, add remarks &rarr; <strong>"Save"</strong></li>
+<li>Click <strong>Process</strong> &rarr; complete the processing popup</li>
+</ol>
+<table class="compare-table">
+<thead><tr><th>Processing Field</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Rejection Option</strong></td><td>Choose "Pay Full Amount" or "Pay Accepted Amount" (see Section 7)</td></tr>
+<tr><td><strong>Internal Notes</strong></td><td>Saved on the invoice workflow trail</td></tr>
+<tr><td><strong>Dispute Summary</strong></td><td>Saved on the Outstanding Rejection document header</td></tr>
+<tr><td><strong>Upload</strong></td><td>Attach supporting documents for the rejection</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub-heading" id="sec6-3">6.3 Reverting a Rejection</h3>
+<div class="section-intro">Made a rejection in error? You can revert it before the invoice leaves the workflow.</div>
+<div class="card">
+<h4 style="font-size:15px; color:#1d4ed8;">6.3.1 Revert Line Item Level</h4>
+<p>In Invoice Summary, click the <strong>revert rejection</strong> button next to the rejected line item.</p>
+
+<h4 style="margin-top:24px; font-size:15px; color:#1d4ed8;">6.3.2 Revert Full Rejection</h4>
+<p>For fully rejected invoices, the <strong>"Revert Rejection"</strong> button appears prominently.</p>
+
+<h4 style="margin-top:24px; font-size:15px; color:#1d4ed8;">6.3.3 Revert Line Item Detail Level</h4>
+<ol class="steps">
+<li>Click <strong>'View LIDs'</strong> in Invoice Summary</li>
+<li>Click the service line item &rarr; revert reject on the specific LID</li>
+<li>Click <strong>'Save'</strong></li>
+</ol>
+</div>
+
+<!-- SECTION 7 -->
+<h2 class="section-heading" id="sec7"><span class="num">7</span>Pay Full &amp; Pay Accepted Accounting</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> The two payment models determine how rejections are financially handled. Understanding this is crucial for correct accounting treatment.
+</div>
+<div class="card">
+<div class="concept-box">
+<h4>Pay Full vs. Pay Accepted — Side by Side</h4>
+<table class="compare-table">
+<thead><tr><th></th><th>Pay Full</th><th>Pay Accepted</th></tr></thead>
+<tbody>
+<tr><td><strong>Payment timing</strong></td><td>Pay full invoice amount immediately</td><td>Pay only accepted (non-rejected) amount</td></tr>
+<tr><td><strong>Posting</strong></td><td>Full amount posted to ERP; rejected portion goes to suspense account</td><td>Only accepted amount posted to ERP</td></tr>
+<tr><td><strong>If vendor accepts rejection</strong></td><td>Vendor issues Credit Note &rarr; link to OR &rarr; suspense account cleared</td><td>Credit Note linked to OR &rarr; both posted; or just close OR if no CN</td></tr>
+<tr><td><strong>If vendor rejects rejection</strong></td><td>Reverse OR &rarr; JV created to book expense from suspense to expense account</td><td>Reverse OR &rarr; payment released for the additional amount</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout warn">
+<span class="callout-icon">&#x26A0;&#xFE0F;</span>
+<div><strong>Key difference:</strong> In <strong>Pay Full</strong>, you've already paid everything — so reversals move money from suspense to expense. In <strong>Pay Accepted</strong>, you haven't paid the disputed amount — so reversals trigger additional payment.</div>
+</div>
+</div>
+
+<!-- SECTION 8 -->
+<h2 class="section-heading" id="sec8"><span class="num">8</span>Outstanding Rejection Document Actions</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> After rejection, the system auto-generates an Outstanding Rejection (OR) document. This section covers how to view, reverse, or close these documents.
+</div>
+<div class="card">
+<div class="callout info">
+<span class="callout-icon">&#x1F4CB;</span>
+<div><strong>Naming convention:</strong> Outstanding rejection documents follow the pattern <code>[InvoiceNumber]-OR-[#]</code>. For example, if invoice <strong>INV0002341</strong> is rejected, the first OR document will be <strong>INV0002341-OR-1</strong>.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec8-1">8.1 View Outstanding Rejection</h3>
+<div class="card">
+<ol class="steps">
+<li>Go to <strong>Invoice Search &rarr; Vendor Invoices</strong></li>
+<li>Find the rejected invoice &rarr; click the view icon</li>
+<li>In Invoice Summary, click <strong>'View Details'</strong></li>
+<li>Click the <strong>OR document link</strong></li>
+<li>View the Outstanding Rejection document</li>
+</ol>
+</div>
+
+<h3 class="sub-heading" id="sec8-2">8.2 Reversing OR — Pay Full Scenario</h3>
+<div class="card">
+<p>When the vendor <strong>doesn't accept</strong> your rejection (Pay Full), you need to reverse the OR to move the amount from suspense to expense:</p>
+<ol class="steps">
+<li>Open the OR from workflow after assigning to self</li>
+<li>Click <strong>"Reverse Outstanding Rejection"</strong></li>
+<li>Enter reversal amounts per service &rarr; click <strong>'Reverse'</strong></li>
+<li>The OR moves out of workflow and a <strong>Journal Voucher (JV)</strong> document is auto-created</li>
+</ol>
+</div>
+
+<h3 class="sub-heading" id="sec8-3">8.3 Reversing OR — Pay Accepted Scenario</h3>
+<div class="card">
+<p>Same process as Pay Full — click <strong>"Reverse Outstanding Rejection"</strong>.</p>
+</div>
+
+<h3 class="sub-heading" id="sec8-4">8.4 Closing OR — Pay Accepted Scenario</h3>
+<div class="card">
+<p>When the vendor <strong>accepts the rejection but doesn't issue a credit note</strong> (Pay Accepted), simply close the OR since no financial adjustment is needed.</p>
+</div>
+
+<h3 class="sub-heading" id="sec8-5">8.5 Outstanding Rejections Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Invoices Report</strong> &rarr; select <strong>"Outstanding Rejections"</strong>.</p>
+<p>Download as .csv or .xlsx.</p>
+</div>
+
+<h3 class="sub-heading" id="sec8-6">8.6 Journal Voucher Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Invoices Report</strong> &rarr; select <strong>"Journal Voucher"</strong>.</p>
+<p>Download as .csv or .xlsx.</p>
+</div>
+
+<!-- SECTION 9 -->
+<h2 class="section-heading" id="sec9"><span class="num">9</span>Processing a Credit Note</h2>
+<div class="section-intro">
+<strong>What you'll learn:</strong> When a vendor accepts a rejection and issues a credit note, you need to link it to the outstanding rejection document and process it through the workflow.
+</div>
+<div class="card">
+<ol class="steps">
+<li><strong>Open the credit note</strong> from workflow</li>
+<li><strong>Click 'Link Outstanding Rejections'</strong></li>
+<li><strong>Select the services</strong> to link</li>
+<li><strong>Enter linking amounts</strong> against each OR document</li>
+<li><strong>Click 'Save'</strong> then <strong>'Process'</strong></li>
+</ol>
+<div class="callout tip">
+<span class="callout-icon">&#x2705;</span>
+<div>After processing, the credit note is posted to the ERP and the linked outstanding rejection document is resolved.</div>
+</div>
+</div>
+
+<h3 class="sub-heading" id="sec9-1">9.1 Credit Note Report</h3>
+<div class="card">
+<p>Navigate to <strong>Reports &rarr; Invoices Report</strong> &rarr; select <strong>"Credit Note"</strong>.</p>
+<p>Download as .csv or .xlsx.</p>
+</div>
+
+<!-- GLOSSARY -->
+<h2 class="section-heading" id="glossary">Glossary</h2>
+<div class="card">
+<table class="compare-table">
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>LID</strong></td><td><strong>Line Item Detail</strong> — An individual charge line within an invoice</td></tr>
+<tr><td><strong>EBL</strong></td><td><strong>Expected Billing Line</strong> — The amount your system expects to be billed</td></tr>
+<tr><td><strong>Recon / Reconciliation</strong></td><td>The process of matching invoice charges (LIDs) against expected amounts (EBLs)</td></tr>
+<tr><td><strong>OR</strong></td><td><strong>Outstanding Rejection</strong> — A document auto-generated when an invoice is rejected</td></tr>
+<tr><td><strong>JV</strong></td><td><strong>Journal Voucher</strong> — An accounting document created when reversing an OR</td></tr>
+<tr><td><strong>Credit Note (CN)</strong></td><td>A document issued by a vendor acknowledging a billing error</td></tr>
+<tr><td><strong>Workflow Queue</strong></td><td>A configured group of similar documents awaiting approval</td></tr>
+<tr><td><strong>FINAL Status</strong></td><td>The completed state of an invoice after all approvals are done</td></tr>
+<tr><td><strong>Tolerance Match</strong></td><td>When the difference between LID and EBL amounts falls within an acceptable range</td></tr>
+<tr><td><strong>Posting</strong></td><td>The act of recording an invoice's accounting entries in the ERP system</td></tr>
+<tr><td><strong>Suspense Account</strong></td><td>A temporary holding account used in Pay Full scenarios for rejected amounts</td></tr>
+<tr><td><strong>SIS</strong></td><td><strong>Simplified Interline Settlement</strong> — An industry-specific settlement mechanism</td></tr>
+<tr><td><strong>Bilateral Invoice</strong></td><td>An invoice exchanged directly between two parties</td></tr>
+<tr><td><strong>Prime Billing</strong></td><td>The initial/original billing from a vendor</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- FAQ -->
+<h2 class="section-heading" id="faq">Frequently Asked Questions</h2>
+<div class="faq">
+<details>
+<summary>I can't approve an invoice — what should I check?</summary>
+<div class="faq-content">Ensure the invoice is <strong>assigned to you</strong>. Click the "Assign to Me" button (person icon) in the workflow dashboard first. Only then will the Process/Cancel buttons appear when you view the document.</div>
+</details>
+<details>
+<summary>What's the difference between "Matched" and "Tolerance Matched"?</summary>
+<div class="faq-content"><strong>Matched</strong> means the LID and EBL amounts are exactly equal. <strong>Tolerance Matched (Tol-Matched)</strong> means there's a small difference within a pre-configured acceptable range. Both are considered acceptable for auto-approval.</div>
+</details>
+<details>
+<summary>I need to fix an accounting error — what's the quickest path?</summary>
+<div class="faq-content">Go to the invoice &rarr; scroll to Accounting section &rarr; click <strong>"View Errors"</strong> &rarr; select the Error Group &rarr; click <strong>"Change Account Value"</strong> to fix &rarr; then <strong>Re-trigger Accounting</strong>. See Sections 5.4.5 and 4.3.</div>
+</details>
+<details>
+<summary>Can I undo a rejection after processing?</summary>
+<div class="faq-content"><strong>Before processing:</strong> Yes — use the "Revert Rejection" button (Section 6.3).<br><strong>After processing:</strong> The rejection creates an Outstanding Rejection document. You can reverse it through the OR workflow (Section 8.2/8.3).</div>
+</details>
+<details>
+<summary>When should I choose "Pay Full" vs "Pay Accepted"?</summary>
+<div class="faq-content">This depends on your organization's payment policy. <strong>Pay Full:</strong> You pay the entire invoice immediately, then handle disputes after. <strong>Pay Accepted:</strong> You only pay what you agree with. See Section 7 for detailed implications.</div>
+</details>
+<details>
+<summary>How do I find invoices with accounting errors?</summary>
+<div class="faq-content">Use <strong>Invoice Search</strong> with the <strong>"Account Posting Status"</strong> filter set to "Error". See Section 3.</div>
+</details>
+<details>
+<summary>What happens to an invoice after it reaches FINAL status?</summary>
+<div class="faq-content">Once an invoice reaches FINAL status, it <strong>leaves the workflow</strong> and is no longer visible in the workflow dashboard. You can still find it through <strong>Invoice Search</strong>.</div>
+</details>
+<details>
+<summary>Why are some LIDs "Unreconciled" and what should I do?</summary>
+<div class="faq-content">Unreconciled LIDs couldn't be matched with any EBLs. Try <strong>Re-trigger Recon</strong> after EBLs are generated, try <strong>Manual Linking</strong> (Section 5.7), or investigate with the vendor.</div>
+</details>
+<details>
+<summary>Can I download any report from the system?</summary>
+<div class="faq-content">Yes. All reports support <strong>.csv</strong> and <strong>.xlsx</strong> download via the download button at the bottom of each report screen.</div>
+</details>
+</div>

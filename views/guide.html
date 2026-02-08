@@ -17,8 +17,8 @@
     <div class="navbar-actions" id="navActions"></div>
   </nav>
 
-  <div class="guide-layout">
-    <aside class="guide-sidebar" id="sidebar">
+  <div class="guide-layout" style="max-width:1300px;">
+    <aside class="guide-sidebar" id="sidebar" style="width:260px;">
       <h4>On this page</h4>
       <ul class="toc-list" id="tocList"></ul>
     </aside>
@@ -45,26 +45,44 @@
       `;
     }
 
-    // Generate TOC from headings
+    // Generate TOC from headings (supports h2, h3, and custom .section-heading, .sub-heading, .sub2-heading)
     function buildToc() {
       const content = document.getElementById('guideContent');
       const toc = document.getElementById('tocList');
-      const headings = content.querySelectorAll('h2, h3');
+      // Select both standard headings and custom heading classes
+      const headings = content.querySelectorAll('h2, h3, .section-heading, .sub-heading, .sub2-heading');
 
       if (headings.length === 0) {
         document.getElementById('sidebar').style.display = 'none';
         return;
       }
 
+      const seen = new Set();
       headings.forEach((heading, i) => {
-        const id = 'section-' + i;
-        heading.id = id;
+        if (seen.has(heading)) return;
+        seen.add(heading);
+
+        // Use existing id or generate one
+        if (!heading.id) {
+          heading.id = 'section-' + i;
+        }
 
         const li = document.createElement('li');
         const a = document.createElement('a');
-        a.href = '#' + id;
-        a.textContent = heading.textContent;
-        a.className = heading.tagName === 'H3' ? 'toc-h3' : '';
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent.replace(/^\d+\s*/, '').substring(0, 60);
+
+        // Determine depth for indentation
+        const isSubHeading = heading.classList.contains('sub-heading') || heading.tagName === 'H3';
+        const isSub2Heading = heading.classList.contains('sub2-heading');
+        if (isSub2Heading) {
+          a.className = 'toc-h3';
+          a.style.paddingLeft = '36px';
+          a.style.fontSize = '12px';
+        } else if (isSubHeading) {
+          a.className = 'toc-h3';
+        }
+
         a.addEventListener('click', (e) => {
           e.preventDefault();
           heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
