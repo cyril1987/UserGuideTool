@@ -554,6 +554,168 @@
       opacity: 0.4;
     }
 
+    /* ===========================
+       SLASH COMMAND MENU
+       =========================== */
+    #slashMenu {
+      position: fixed;
+      z-index: 2500;
+      display: none;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      width: 280px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+    #slashMenu.visible {
+      display: block;
+    }
+    #slashMenu .slash-search {
+      width: calc(100% - 12px);
+      margin: 4px 6px 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    #slashMenu .slash-search:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+    .slash-category {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 10px 4px;
+    }
+    .slash-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 13px;
+      color: var(--gray-700);
+      transition: background 0.1s;
+    }
+    .slash-item:hover, .slash-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .slash-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .slash-item:hover .slash-item-icon,
+    .slash-item.active .slash-item-icon {
+      background: #dbeafe;
+    }
+    .slash-item-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .slash-item-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .slash-item-desc {
+      font-size: 11px;
+      color: var(--gray-400);
+      font-weight: 400;
+    }
+    .slash-empty {
+      padding: 16px 10px;
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+
+    /* ===========================
+       EXPAND/COLLAPSE SECTIONS
+       =========================== */
+    #visual-editor details.expand-block {
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+    #visual-editor details.expand-block[open] {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    #visual-editor details.expand-block summary {
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--gray-900);
+      background: var(--gray-50);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    #visual-editor details.expand-block summary::-webkit-details-marker {
+      display: none;
+    }
+    #visual-editor details.expand-block summary::before {
+      content: '\25B8';
+      font-size: 12px;
+      color: var(--primary);
+      transition: transform 0.2s;
+    }
+    #visual-editor details.expand-block[open] summary::before {
+      transform: rotate(90deg);
+    }
+    #visual-editor details.expand-block .expand-content {
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--gray-600);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    /* ===========================
+       INLINE CODE HIGHLIGHT
+       =========================== */
+    #visual-editor code:not(pre code) {
+      background: var(--gray-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      color: #e11d48;
+    }
+
+    /* ===========================
+       TEXT ALIGNMENT (editor)
+       =========================== */
+    #visual-editor [style*="text-align: center"],
+    #visual-editor [style*="text-align:center"] {
+      text-align: center;
+    }
+    #visual-editor [style*="text-align: right"],
+    #visual-editor [style*="text-align:right"] {
+      text-align: right;
+    }
+
     /* HTML Source editor */
     #source-editor {
       display: none;
@@ -609,6 +771,8 @@
           <option value="h2">Heading 2</option>
           <option value="h3">Heading 3</option>
           <option value="h4">Heading 4</option>
+          <option value="h5">Heading 5</option>
+          <option value="h6">Heading 6</option>
           <option value="blockquote">Quote</option>
           <option value="pre">Code Block</option>
         </select>
@@ -618,6 +782,20 @@
         <button class="fmt-btn" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
         <button class="fmt-btn" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
         <button class="fmt-btn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+        <button class="fmt-btn" id="btnInlineCode" title="Inline Code (Ctrl+E)" style="font-family: 'SF Mono', monospace; font-size: 13px;">&lt;/&gt;</button>
+        <button class="fmt-btn" data-cmd="subscript" title="Subscript"><span style="font-size:11px;">X<sub style="font-size:9px;">2</sub></span></button>
+        <button class="fmt-btn" data-cmd="superscript" title="Superscript"><span style="font-size:11px;">X<sup style="font-size:9px;">2</sup></span></button>
+      </div>
+      <div class="fmt-group">
+        <button class="fmt-btn" id="btnAlignLeft" title="Align left">
+          <svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" id="btnAlignCenter" title="Align center">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" id="btnAlignRight" title="Align right">
+          <svg viewBox="0 0 24 24"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+        </button>
       </div>
       <div class="fmt-group">
         <button class="fmt-btn" data-cmd="insertOrderedList" title="Numbered list">
@@ -662,6 +840,7 @@
       <button class="insert-btn" id="insertInfo" title="Insert an Info callout">&#x2139;&#xFE0F; Info</button>
       <button class="insert-btn" id="insertCard" title="Insert a content card">&#x1F4C4; Card</button>
       <button class="insert-btn" id="insertTable" title="Insert a table">&#x1F4CB; Table</button>
+      <button class="insert-btn" id="insertExpand" title="Insert expand/collapse section">&#x25B6; Expand</button>
       <button class="insert-btn" id="insertImage" title="Upload an image">&#x1F4F7; Image</button>
       <button class="insert-btn" id="insertHR" title="Insert horizontal rule">&#x2015; Divider</button>
     </div>
@@ -803,6 +982,12 @@
         <button class="btn btn-danger btn-sm" id="deleteConfirm">Delete</button>
       </div>
     </div>
+  </div>
+
+  <!-- Slash Command Menu -->
+  <div id="slashMenu">
+    <input type="text" class="slash-search" id="slashSearch" placeholder="Search commands..." autocomplete="off">
+    <div id="slashItems"></div>
   </div>
 
   <!-- Toast -->
@@ -1145,7 +1330,7 @@
     let clipboardBlock = null; // for block copy/cut
 
     // Block types we can select
-    const BLOCK_SELECTORS = ['TABLE', 'IMG'];
+    const BLOCK_SELECTORS = ['TABLE', 'IMG', 'DETAILS'];
     const BLOCK_CLASSES = ['card', 'callout', 'concept-box', 'overview-panel',
       'flow-diagram', 'steps', 'faq', 'section-heading', 'sub-heading', 'sub2-heading'];
 
@@ -1164,8 +1349,10 @@
     function getBlockLabel(el) {
       if (el.tagName === 'TABLE') return 'Table';
       if (el.tagName === 'IMG') return 'Image';
+      if (el.tagName === 'DETAILS') return 'Expand';
       if (el.classList.contains('card')) return 'Card';
       if (el.classList.contains('callout')) return 'Callout';
+      if (el.classList.contains('expand-block')) return 'Expand';
       if (el.classList.contains('concept-box')) return 'Concept';
       if (el.classList.contains('overview-panel')) return 'Overview';
       if (el.classList.contains('flow-diagram')) return 'Flow';
@@ -2112,6 +2299,8 @@
       temp.querySelectorAll('.cell-active').forEach(el => el.classList.remove('cell-active'));
       temp.querySelectorAll('.row-active').forEach(el => el.classList.remove('row-active'));
       temp.querySelectorAll('.col-resize-handle').forEach(h => h.remove());
+      // Clean up zero-width spaces from markdown conversion
+      temp.innerHTML = temp.innerHTML.replace(/\u200B/g, '');
       return temp.innerHTML;
     }
 
@@ -2246,6 +2435,452 @@
       toast.classList.add('visible');
       setTimeout(() => toast.classList.remove('visible'), 3000);
     }
+
+    // ===========================
+    //  PHASE 1: INLINE CODE (Ctrl+E)
+    // ===========================
+    document.getElementById('btnInlineCode').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      applyInlineCode();
+    });
+
+    function applyInlineCode() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+
+      // Check if already inside a <code> element
+      let parent = range.commonAncestorContainer;
+      if (parent.nodeType === 3) parent = parent.parentElement;
+      const existingCode = parent.closest ? parent.closest('code') : null;
+      if (existingCode && !existingCode.closest('pre')) {
+        // Unwrap: remove the code tag
+        snapshotBeforeAction();
+        const text = document.createTextNode(existingCode.textContent);
+        existingCode.replaceWith(text);
+        // Re-select the text
+        const newRange = document.createRange();
+        newRange.selectNodeContents(text);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        snapshotAfterAction();
+        return;
+      }
+
+      const selectedText = sel.toString();
+      if (selectedText.length > 0) {
+        snapshotBeforeAction();
+        const code = document.createElement('code');
+        try {
+          range.surroundContents(code);
+        } catch (e) {
+          // If range spans multiple elements, use insertHTML
+          const escaped = selectedText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          document.execCommand('insertHTML', false, '<code>' + escaped + '</code>');
+        }
+        snapshotAfterAction();
+      }
+    }
+
+    // Ctrl+E shortcut for inline code
+    visualEditor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        applyInlineCode();
+      }
+    });
+
+    // ===========================
+    //  PHASE 1: TEXT ALIGNMENT
+    // ===========================
+    document.getElementById('btnAlignLeft').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      snapshotBeforeAction();
+      document.execCommand('justifyLeft', false, null);
+      updateAlignmentState();
+      snapshotAfterAction();
+    });
+    document.getElementById('btnAlignCenter').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      snapshotBeforeAction();
+      document.execCommand('justifyCenter', false, null);
+      updateAlignmentState();
+      snapshotAfterAction();
+    });
+    document.getElementById('btnAlignRight').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      snapshotBeforeAction();
+      document.execCommand('justifyRight', false, null);
+      updateAlignmentState();
+      snapshotAfterAction();
+    });
+
+    function updateAlignmentState() {
+      document.getElementById('btnAlignLeft').classList.toggle('active', document.queryCommandState('justifyLeft'));
+      document.getElementById('btnAlignCenter').classList.toggle('active', document.queryCommandState('justifyCenter'));
+      document.getElementById('btnAlignRight').classList.toggle('active', document.queryCommandState('justifyRight'));
+    }
+
+    // Hook into existing toolbar state updates
+    const _origUpdateToolbarState = updateToolbarState;
+    updateToolbarState = function() {
+      _origUpdateToolbarState();
+      updateAlignmentState();
+    };
+
+    // ===========================
+    //  PHASE 1: EXPAND/COLLAPSE
+    // ===========================
+    document.getElementById('insertExpand').addEventListener('click', () => {
+      snapshotBeforeAction();
+      insertAtCursor(
+        '<details class="expand-block" open>' +
+          '<summary>Click to expand</summary>' +
+          '<div class="expand-content"><p>Expandable content here...</p></div>' +
+        '</details><p><br></p>'
+      );
+      showToast('Expand section inserted');
+      snapshotAfterAction();
+    });
+
+    // Add expand-block to the block selection system
+    BLOCK_CLASSES.push('expand-block');
+
+    // ===========================
+    //  PHASE 1: SLASH COMMAND MENU
+    // ===========================
+    const slashMenu = document.getElementById('slashMenu');
+    const slashSearch = document.getElementById('slashSearch');
+    const slashItems = document.getElementById('slashItems');
+    let slashActive = false;
+    let slashRange = null;
+    let slashActiveIndex = 0;
+    let slashFilteredItems = [];
+
+    const SLASH_COMMANDS = [
+      // Text blocks
+      { cat: 'Text', name: 'Heading 1', desc: 'Large section heading', icon: 'H1', action: () => document.execCommand('formatBlock', false, '<h1>') },
+      { cat: 'Text', name: 'Heading 2', desc: 'Medium section heading', icon: 'H2', action: () => document.execCommand('formatBlock', false, '<h2>') },
+      { cat: 'Text', name: 'Heading 3', desc: 'Small section heading', icon: 'H3', action: () => document.execCommand('formatBlock', false, '<h3>') },
+      { cat: 'Text', name: 'Heading 4', desc: 'Sub-section heading', icon: 'H4', action: () => document.execCommand('formatBlock', false, '<h4>') },
+      { cat: 'Text', name: 'Heading 5', desc: 'Minor heading', icon: 'H5', action: () => document.execCommand('formatBlock', false, '<h5>') },
+      { cat: 'Text', name: 'Heading 6', desc: 'Smallest heading', icon: 'H6', action: () => document.execCommand('formatBlock', false, '<h6>') },
+      { cat: 'Text', name: 'Paragraph', desc: 'Normal text', icon: '\u00B6', action: () => document.execCommand('formatBlock', false, '<p>') },
+      { cat: 'Text', name: 'Quote', desc: 'Blockquote', icon: '\u201C', action: () => document.execCommand('formatBlock', false, '<blockquote>') },
+      { cat: 'Text', name: 'Code Block', desc: 'Preformatted code', icon: '<>', action: () => document.execCommand('formatBlock', false, '<pre>') },
+      // Lists
+      { cat: 'Lists', name: 'Bullet List', desc: 'Unordered list', icon: '\u2022', action: () => document.execCommand('insertUnorderedList') },
+      { cat: 'Lists', name: 'Numbered List', desc: 'Ordered list', icon: '1.', action: () => document.execCommand('insertOrderedList') },
+      // Insert blocks
+      { cat: 'Blocks', name: 'Table', desc: 'Insert a data table', icon: '\uD83D\uDCCB', action: () => document.getElementById('tableModal').classList.add('visible') },
+      { cat: 'Blocks', name: 'Divider', desc: 'Horizontal rule', icon: '\u2015', action: () => insertAtCursor('<hr><p><br></p>') },
+      { cat: 'Blocks', name: 'Expand', desc: 'Collapsible section', icon: '\u25B6', action: () => document.getElementById('insertExpand').click() },
+      { cat: 'Blocks', name: 'Image', desc: 'Upload an image', icon: '\uD83D\uDCF7', action: () => document.getElementById('imageInput').click() },
+      // Callouts
+      { cat: 'Callouts', name: 'Tip', desc: 'Green tip callout', icon: '\u2705', action: () => insertCallout('tip', '&#x2705;', 'Tip') },
+      { cat: 'Callouts', name: 'Did You Know', desc: 'Yellow insight callout', icon: '\uD83D\uDCA1', action: () => insertCallout('tip', '&#x1F4A1;', 'Did You Know') },
+      { cat: 'Callouts', name: 'Warning', desc: 'Orange warning callout', icon: '\u26A0\uFE0F', action: () => insertCallout('warn', '&#x26A0;&#xFE0F;', 'Warning') },
+      { cat: 'Callouts', name: 'Info', desc: 'Blue info callout', icon: '\u2139\uFE0F', action: () => insertCallout('info', '&#x2139;&#xFE0F;', 'Info') },
+      { cat: 'Blocks', name: 'Card', desc: 'Content card', icon: '\uD83D\uDCC4', action: () => { insertAtCursor('<div class="card"><p>Type your card content here...</p></div><p><br></p>'); showToast('Card inserted'); } },
+      // Inline
+      { cat: 'Inline', name: 'Inline Code', desc: 'Code formatting', icon: '<>', action: () => applyInlineCode() },
+    ];
+
+    function renderSlashMenu(query) {
+      const q = (query || '').toLowerCase().trim();
+      slashFilteredItems = SLASH_COMMANDS.filter(cmd =>
+        !q || cmd.name.toLowerCase().includes(q) || cmd.desc.toLowerCase().includes(q) || cmd.cat.toLowerCase().includes(q)
+      );
+
+      if (slashFilteredItems.length === 0) {
+        slashItems.innerHTML = '<div class="slash-empty">No commands found</div>';
+        return;
+      }
+
+      let html = '';
+      let lastCat = '';
+      slashFilteredItems.forEach((cmd, i) => {
+        if (cmd.cat !== lastCat) {
+          html += `<div class="slash-category">${cmd.cat}</div>`;
+          lastCat = cmd.cat;
+        }
+        html += `<button class="slash-item${i === slashActiveIndex ? ' active' : ''}" data-idx="${i}">
+          <span class="slash-item-icon">${cmd.icon}</span>
+          <span class="slash-item-text">
+            <span class="slash-item-name">${cmd.name}</span>
+            <span class="slash-item-desc">${cmd.desc}</span>
+          </span>
+        </button>`;
+      });
+      slashItems.innerHTML = html;
+
+      // Click handlers
+      slashItems.querySelectorAll('.slash-item').forEach(btn => {
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const idx = parseInt(btn.dataset.idx);
+          executeSlashCommand(idx);
+        });
+      });
+    }
+
+    function openSlashMenu() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      slashRange = sel.getRangeAt(0).cloneRange();
+      slashActiveIndex = 0;
+
+      // Position the menu at the cursor
+      const rect = slashRange.getBoundingClientRect();
+      let top = rect.bottom + 4;
+      let left = rect.left;
+      // Adjust if near bottom of viewport
+      if (top + 340 > window.innerHeight) top = rect.top - 344;
+      left = Math.max(8, Math.min(left, window.innerWidth - 290));
+      slashMenu.style.top = top + 'px';
+      slashMenu.style.left = left + 'px';
+
+      slashSearch.value = '';
+      renderSlashMenu('');
+      slashMenu.classList.add('visible');
+      slashActive = true;
+
+      // Focus the search but keep cursor info
+      setTimeout(() => slashSearch.focus(), 10);
+    }
+
+    function closeSlashMenu() {
+      slashMenu.classList.remove('visible');
+      slashActive = false;
+      slashRange = null;
+      slashSearch.value = '';
+    }
+
+    function executeSlashCommand(idx) {
+      if (idx < 0 || idx >= slashFilteredItems.length) return;
+      const cmd = slashFilteredItems[idx];
+
+      // Remove the "/" character that triggered the menu
+      if (slashRange) {
+        const sel = window.getSelection();
+        // Expand range to include the "/" and any typed filter text
+        const range = slashRange.cloneRange();
+        // Move back to delete the `/` trigger + any search text
+        const searchLen = slashSearch.value.length;
+        try {
+          range.setStart(range.startContainer, Math.max(0, range.startOffset - 1));
+          sel.removeAllRanges();
+          sel.addRange(range);
+          // Delete the slash and replace caret position
+          range.deleteContents();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch(e) {}
+      }
+
+      closeSlashMenu();
+      visualEditor.focus();
+
+      snapshotBeforeAction();
+      cmd.action();
+      snapshotAfterAction();
+    }
+
+    slashSearch.addEventListener('input', () => {
+      slashActiveIndex = 0;
+      renderSlashMenu(slashSearch.value);
+    });
+
+    slashSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        slashActiveIndex = Math.min(slashActiveIndex + 1, slashFilteredItems.length - 1);
+        renderSlashMenu(slashSearch.value);
+        scrollSlashActive();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        slashActiveIndex = Math.max(slashActiveIndex - 1, 0);
+        renderSlashMenu(slashSearch.value);
+        scrollSlashActive();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        executeSlashCommand(slashActiveIndex);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSlashMenu();
+        visualEditor.focus();
+      }
+    });
+
+    function scrollSlashActive() {
+      const active = slashItems.querySelector('.slash-item.active');
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    }
+
+    // Listen for "/" key in the editor to trigger the slash menu
+    visualEditor.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !slashActive) {
+        // Check we're not in a code block or pre
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          let node = sel.anchorNode;
+          while (node && node !== visualEditor) {
+            if (node.nodeType === 1 && (node.tagName === 'PRE' || node.tagName === 'CODE')) return;
+            node = node.parentElement;
+          }
+        }
+        // Let the "/" character be typed, then open menu
+        setTimeout(() => openSlashMenu(), 10);
+      }
+    });
+
+    // Close slash menu on outside click
+    document.addEventListener('mousedown', (e) => {
+      if (slashActive && !slashMenu.contains(e.target)) {
+        closeSlashMenu();
+      }
+    });
+
+    // ===========================
+    //  PHASE 1: MARKDOWN AUTO-CONVERT
+    // ===========================
+    visualEditor.addEventListener('input', (e) => {
+      if (currentMode !== 'visual') return;
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+
+      const node = sel.anchorNode;
+      if (!node || node.nodeType !== 3) return;
+
+      const text = node.textContent;
+      const offset = sel.anchorOffset;
+
+      // Only trigger on space after the pattern (at the beginning of a line/block)
+      if (text.charAt(offset - 1) !== ' ') return;
+
+      // Get the text before the space
+      const before = text.substring(0, offset - 1);
+
+      // Determine the parent block element
+      let blockEl = node.parentElement;
+      while (blockEl && blockEl !== visualEditor && !['P','DIV','LI','BLOCKQUOTE','H1','H2','H3','H4','H5','H6','PRE'].includes(blockEl.tagName)) {
+        blockEl = blockEl.parentElement;
+      }
+
+      // Only convert if text is at the start of the block
+      if (!blockEl || blockEl === visualEditor) return;
+      const blockText = blockEl.textContent;
+      const trimmedBefore = before.trim();
+      // Check that the pattern is at the very start of the block text
+      if (!blockText.startsWith(before + ' ') && !blockText.startsWith(before)) return;
+
+      // Already inside a heading/list/quote/pre? Skip
+      if (['H1','H2','H3','H4','H5','H6','PRE'].includes(blockEl.tagName) && before.startsWith('#')) return;
+      if (['UL','OL'].includes(blockEl.parentElement?.tagName) && (before === '*' || before === '-' || /^\d+\.$/.test(before))) return;
+
+      let converted = false;
+
+      // Heading patterns: # through ######
+      const headingMatch = before.match(/^(#{1,6})$/);
+      if (headingMatch && ['P','DIV'].includes(blockEl.tagName)) {
+        const level = headingMatch[1].length;
+        snapshotBeforeAction();
+        // Remove the # and space, then format
+        const restOfText = text.substring(offset);
+        blockEl.textContent = restOfText || '\u200B';
+        placeCursorIn(blockEl);
+        document.execCommand('formatBlock', false, `<h${level}>`);
+        converted = true;
+      }
+
+      // Bullet list: * or -
+      if (!converted && (trimmedBefore === '*' || trimmedBefore === '-') && ['P','DIV'].includes(blockEl.tagName)) {
+        snapshotBeforeAction();
+        const restOfText = text.substring(offset);
+        blockEl.textContent = restOfText || '\u200B';
+        placeCursorIn(blockEl);
+        document.execCommand('insertUnorderedList');
+        converted = true;
+      }
+
+      // Numbered list: 1.
+      if (!converted && /^\d+\.$/.test(trimmedBefore) && ['P','DIV'].includes(blockEl.tagName)) {
+        snapshotBeforeAction();
+        const restOfText = text.substring(offset);
+        blockEl.textContent = restOfText || '\u200B';
+        placeCursorIn(blockEl);
+        document.execCommand('insertOrderedList');
+        converted = true;
+      }
+
+      // Blockquote: >
+      if (!converted && trimmedBefore === '>' && ['P','DIV'].includes(blockEl.tagName)) {
+        snapshotBeforeAction();
+        const restOfText = text.substring(offset);
+        blockEl.textContent = restOfText || '\u200B';
+        placeCursorIn(blockEl);
+        document.execCommand('formatBlock', false, '<blockquote>');
+        converted = true;
+      }
+
+      // Horizontal rule: ---
+      if (!converted && (trimmedBefore === '---' || trimmedBefore === '***') && ['P','DIV'].includes(blockEl.tagName)) {
+        snapshotBeforeAction();
+        blockEl.innerHTML = '<br>';
+        insertAtCursor('<hr><p><br></p>');
+        converted = true;
+      }
+
+      // Checklist / task: []
+      if (!converted && (trimmedBefore === '[]' || trimmedBefore === '[ ]') && ['P','DIV'].includes(blockEl.tagName)) {
+        snapshotBeforeAction();
+        const restOfText = text.substring(offset);
+        blockEl.innerHTML = '<input type="checkbox" style="margin-right:8px; vertical-align:middle; cursor:pointer;">' + (restOfText || 'Task item');
+        // Place cursor after checkbox
+        const range = document.createRange();
+        range.selectNodeContents(blockEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        converted = true;
+      }
+
+      if (converted) {
+        snapshotAfterAction();
+        updateToolbarState();
+      }
+    });
+
+    // Handle triple backtick → code block
+    visualEditor.addEventListener('keydown', (e) => {
+      if (e.key !== '`') return;
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const node = sel.anchorNode;
+      if (!node || node.nodeType !== 3) return;
+
+      const text = node.textContent;
+      const offset = sel.anchorOffset;
+      // Check if typing the third backtick: text before cursor is ``
+      const before = text.substring(0, offset);
+      if (before.endsWith('``')) {
+        // Will become ``` after this keypress
+        e.preventDefault();
+        snapshotBeforeAction();
+        let blockEl = node.parentElement;
+        while (blockEl && blockEl !== visualEditor && !['P','DIV'].includes(blockEl.tagName)) {
+          blockEl = blockEl.parentElement;
+        }
+        if (blockEl && blockEl !== visualEditor) {
+          const restOfText = text.substring(offset);
+          blockEl.textContent = restOfText || '\u200B';
+          placeCursorIn(blockEl);
+          document.execCommand('formatBlock', false, '<pre>');
+        }
+        snapshotAfterAction();
+        updateToolbarState();
+      }
+    });
   </script>
 </body>
 </html>
