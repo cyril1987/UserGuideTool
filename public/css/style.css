@@ -1046,6 +1046,173 @@ a:hover {
 }
 
 /* ===========================
+   RICH CONTENT — CODE BLOCK (highlighted)
+   =========================== */
+
+.guide-content .code-block-wrapper {
+  position: relative;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.guide-content .code-block-wrapper .code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--gray-100);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 12px;
+}
+
+.guide-content .code-block-wrapper .code-lang-select {
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: white;
+  color: var(--gray-700);
+  pointer-events: none;
+}
+
+.guide-content .code-block-wrapper .code-copy-btn {
+  border: none;
+  background: none;
+  color: var(--gray-500);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.guide-content .code-block-wrapper .code-copy-btn:hover {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.guide-content .code-block-wrapper pre {
+  margin: 0;
+  border-radius: 0;
+  padding: 16px;
+  background: #f8f9fa;
+  overflow-x: auto;
+}
+
+.guide-content .code-block-wrapper pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+/* ===========================
+   RICH CONTENT — MULTI-COLUMN LAYOUTS
+   =========================== */
+
+.guide-content .column-layout {
+  display: flex;
+  gap: 24px;
+  margin: 20px 0;
+}
+
+.guide-content .column-layout .column {
+  flex: 1;
+  min-width: 0;
+}
+
+.guide-content .column-layout.cols-70-30 .column:first-child { flex: 7; }
+.guide-content .column-layout.cols-70-30 .column:last-child { flex: 3; }
+.guide-content .column-layout.cols-30-70 .column:first-child { flex: 3; }
+.guide-content .column-layout.cols-30-70 .column:last-child { flex: 7; }
+
+@media (max-width: 768px) {
+  .guide-content .column-layout {
+    flex-direction: column;
+  }
+}
+
+/* ===========================
+   RICH CONTENT — STATUS BADGES (extended)
+   =========================== */
+
+.status.grey {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+/* ===========================
+   RICH CONTENT — TASK / CHECKLIST
+   =========================== */
+
+.guide-content .task-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0;
+}
+
+.guide-content .task-list .task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  list-style: none;
+}
+
+.guide-content .task-list .task-item input[type="checkbox"] {
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.guide-content .task-list .task-item .task-text {
+  flex: 1;
+}
+
+.guide-content .task-list .task-item.checked .task-text {
+  text-decoration: line-through;
+  color: var(--gray-400);
+}
+
+/* ===========================
+   RICH CONTENT — VIDEO EMBED
+   =========================== */
+
+.guide-content .video-embed {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 16px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  background: #000;
+}
+
+.guide-content .video-embed .video-responsive {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+}
+
+.guide-content .video-embed .video-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ===========================
    RICH CONTENT — KEYBOARD SHORTCUT
    =========================== */
 

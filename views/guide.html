@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}} — User Guides</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -230,6 +232,40 @@
 
     scrollToHash();
     window.addEventListener('hashchange', scrollToHash);
+
+    // --- Syntax highlighting for code blocks ---
+    if (typeof hljs !== 'undefined') {
+      document.querySelectorAll('.code-block-wrapper pre code').forEach(block => {
+        hljs.highlightElement(block);
+      });
+      // Also highlight plain pre>code blocks without wrapper
+      document.querySelectorAll('pre code:not(.code-block-wrapper code)').forEach(block => {
+        hljs.highlightElement(block);
+      });
+    }
+
+    // --- Code copy buttons ---
+    document.querySelectorAll('.code-block-wrapper .code-copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const wrapper = btn.closest('.code-block-wrapper');
+        const code = wrapper ? wrapper.querySelector('code') : null;
+        if (code) {
+          navigator.clipboard.writeText(code.textContent).then(() => {
+            const origText = btn.innerHTML;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.innerHTML = origText; }, 2000);
+          });
+        }
+      });
+    });
+
+    // --- Task list checkbox toggling ---
+    document.querySelectorAll('.task-list .task-item input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const li = cb.closest('.task-item');
+        if (li) li.classList.toggle('checked', cb.checked);
+      });
+    });
   </script>
 </body>
 </html>

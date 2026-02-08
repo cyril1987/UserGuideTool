@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{pageTitle}} — User Guides</title>
   <link rel="stylesheet" href="/css/style.css">
+  <!-- highlight.js for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     /* ===========================
        EDITOR LAYOUT
@@ -705,6 +708,193 @@
     }
 
     /* ===========================
+       CODE BLOCK WITH SYNTAX HIGHLIGHTING
+       =========================== */
+    #visual-editor .code-block-wrapper {
+      position: relative;
+      margin: 16px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+    #visual-editor .code-block-wrapper .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 12px;
+    }
+    #visual-editor .code-block-wrapper .code-lang-select {
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      background: white;
+      color: var(--gray-700);
+      cursor: pointer;
+    }
+    #visual-editor .code-block-wrapper .code-copy-btn {
+      border: none;
+      background: none;
+      color: var(--gray-500);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #visual-editor .code-block-wrapper .code-copy-btn:hover {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+    #visual-editor .code-block-wrapper pre {
+      margin: 0;
+      border-radius: 0;
+      padding: 16px;
+      background: #f8f9fa;
+      overflow-x: auto;
+    }
+    #visual-editor .code-block-wrapper pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ===========================
+       MULTI-COLUMN LAYOUTS
+       =========================== */
+    #visual-editor .column-layout {
+      display: flex;
+      gap: 20px;
+      margin: 16px 0;
+      border: 2px dashed var(--gray-200);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 80px;
+    }
+    #visual-editor .column-layout:hover {
+      border-color: var(--gray-300);
+    }
+    #visual-editor .column-layout .column {
+      flex: 1;
+      min-height: 60px;
+      padding: 12px;
+      border: 1px dashed var(--gray-200);
+      border-radius: 6px;
+      position: relative;
+    }
+    #visual-editor .column-layout .column:focus-within {
+      border-color: var(--primary);
+      background: rgba(37, 99, 235, 0.02);
+    }
+    #visual-editor .column-layout .column:empty::before {
+      content: 'Type here...';
+      color: var(--gray-400);
+      pointer-events: none;
+    }
+    #visual-editor .column-layout.cols-70-30 .column:first-child { flex: 7; }
+    #visual-editor .column-layout.cols-70-30 .column:last-child { flex: 3; }
+    #visual-editor .column-layout.cols-30-70 .column:first-child { flex: 3; }
+    #visual-editor .column-layout.cols-30-70 .column:last-child { flex: 7; }
+
+    /* ===========================
+       STATUS BADGE PICKER
+       =========================== */
+    #statusModal .status-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    #statusModal .status-colors {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    #statusModal .status-color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    #statusModal .status-color-btn:hover {
+      transform: scale(1.15);
+    }
+    #statusModal .status-color-btn.selected {
+      border-color: var(--gray-900);
+      box-shadow: 0 0 0 2px white, 0 0 0 4px var(--gray-400);
+    }
+
+    /* ===========================
+       TASK / CHECKLIST ITEMS
+       =========================== */
+    #visual-editor .task-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 12px 0;
+    }
+    #visual-editor .task-list .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      list-style: none;
+    }
+    #visual-editor .task-list .task-item input[type="checkbox"] {
+      margin-top: 4px;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+    }
+    #visual-editor .task-list .task-item .task-text {
+      flex: 1;
+      outline: none;
+      min-height: 1.5em;
+    }
+    #visual-editor .task-list .task-item.checked .task-text {
+      text-decoration: line-through;
+      color: var(--gray-400);
+    }
+
+    /* ===========================
+       VIDEO EMBED
+       =========================== */
+    #visual-editor .video-embed {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 16px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+      background: #000;
+    }
+    #visual-editor .video-embed .video-responsive {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+    }
+    #visual-editor .video-embed .video-responsive iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ===========================
        TEXT ALIGNMENT (editor)
        =========================== */
     #visual-editor [style*="text-align: center"],
@@ -841,6 +1031,11 @@
       <button class="insert-btn" id="insertCard" title="Insert a content card">&#x1F4C4; Card</button>
       <button class="insert-btn" id="insertTable" title="Insert a table">&#x1F4CB; Table</button>
       <button class="insert-btn" id="insertExpand" title="Insert expand/collapse section">&#x25B6; Expand</button>
+      <button class="insert-btn" id="insertCodeBlock" title="Insert code block with syntax highlighting">&#x1F4BB; Code</button>
+      <button class="insert-btn" id="insertColumns" title="Insert column layout">&#x25EB; Columns</button>
+      <button class="insert-btn" id="insertStatus" title="Insert status badge">&#x1F7E2; Status</button>
+      <button class="insert-btn" id="insertTaskList" title="Insert task/checklist">&#x2611; Tasks</button>
+      <button class="insert-btn" id="insertVideo" title="Embed YouTube/Vimeo video">&#x25B6;&#xFE0F; Video</button>
       <button class="insert-btn" id="insertImage" title="Upload an image">&#x1F4F7; Image</button>
       <button class="insert-btn" id="insertHR" title="Insert horizontal rule">&#x2015; Divider</button>
     </div>
@@ -980,6 +1175,125 @@
       <div class="modal-actions">
         <button class="btn btn-secondary btn-sm" id="deleteCancel">Cancel</button>
         <button class="btn btn-danger btn-sm" id="deleteConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Badge Modal -->
+  <div class="modal-overlay" id="statusModal">
+    <div class="modal">
+      <h3>Insert Status Badge</h3>
+      <div class="form-group">
+        <label for="statusText">Label</label>
+        <input type="text" id="statusText" value="IN PROGRESS" placeholder="Badge text...">
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <div class="status-colors" id="statusColors">
+          <button class="status-color-btn selected" data-color="blue" style="background:#dbeafe;" title="Blue"></button>
+          <button class="status-color-btn" data-color="green" style="background:#dcfce7;" title="Green"></button>
+          <button class="status-color-btn" data-color="amber" style="background:#fef3c7;" title="Yellow"></button>
+          <button class="status-color-btn" data-color="red" style="background:#fee2e2;" title="Red"></button>
+          <button class="status-color-btn" data-color="purple" style="background:#ede9fe;" title="Purple"></button>
+          <button class="status-color-btn" data-color="grey" style="background:#f3f4f6;" title="Grey"></button>
+        </div>
+      </div>
+      <div class="status-preview">
+        <span>Preview:</span>
+        <span class="status blue" id="statusPreview">IN PROGRESS</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="statusCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="statusInsert">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column Layout Modal -->
+  <div class="modal-overlay" id="columnsModal">
+    <div class="modal">
+      <h3>Insert Column Layout</h3>
+      <div class="form-group">
+        <label>Choose layout</label>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:8px;">
+          <button class="btn btn-secondary btn-sm col-layout-option" data-layout="50-50" style="height:48px; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <span style="flex:1;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+            <span style="flex:1;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+          </button>
+          <button class="btn btn-secondary btn-sm col-layout-option" data-layout="33-33-33" style="height:48px; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <span style="flex:1;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+            <span style="flex:1;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+            <span style="flex:1;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+          </button>
+          <button class="btn btn-secondary btn-sm col-layout-option" data-layout="70-30" style="height:48px; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <span style="flex:7;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+            <span style="flex:3;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+          </button>
+          <button class="btn btn-secondary btn-sm col-layout-option" data-layout="30-70" style="height:48px; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <span style="flex:3;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+            <span style="flex:7;height:24px;background:var(--gray-200);border-radius:3px;"></span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="columnsCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Embed Modal -->
+  <div class="modal-overlay" id="videoModal">
+    <div class="modal">
+      <h3>Embed Video</h3>
+      <div class="form-group">
+        <label for="videoUrl">YouTube or Vimeo URL</label>
+        <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+      </div>
+      <p style="font-size:12px; color:var(--gray-400); margin-top:-4px;">Supports YouTube and Vimeo URLs</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="videoCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="videoInsert">Embed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Block Language Modal -->
+  <div class="modal-overlay" id="codeBlockModal">
+    <div class="modal">
+      <h3>Insert Code Block</h3>
+      <div class="form-group">
+        <label for="codeBlockLang">Language</label>
+        <select id="codeBlockLang" class="fmt-select" style="width:100%; height:36px; font-size:14px;">
+          <option value="plaintext">Plain Text</option>
+          <option value="javascript" selected>JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="json">JSON</option>
+          <option value="sql">SQL</option>
+          <option value="bash">Bash / Shell</option>
+          <option value="java">Java</option>
+          <option value="csharp">C#</option>
+          <option value="php">PHP</option>
+          <option value="ruby">Ruby</option>
+          <option value="go">Go</option>
+          <option value="rust">Rust</option>
+          <option value="yaml">YAML</option>
+          <option value="xml">XML</option>
+          <option value="markdown">Markdown</option>
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="swift">Swift</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="dart">Dart</option>
+          <option value="r">R</option>
+          <option value="dockerfile">Dockerfile</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="codeBlockCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="codeBlockInsert">Insert</button>
       </div>
     </div>
   </div>
@@ -2301,6 +2615,26 @@
       temp.querySelectorAll('.col-resize-handle').forEach(h => h.remove());
       // Clean up zero-width spaces from markdown conversion
       temp.innerHTML = temp.innerHTML.replace(/\u200B/g, '');
+      // Make code blocks non-editable in saved output
+      temp.querySelectorAll('.code-block-wrapper').forEach(w => {
+        w.removeAttribute('contenteditable');
+        const code = w.querySelector('code');
+        if (code) code.removeAttribute('contenteditable');
+      });
+      // Clean column layout editability
+      temp.querySelectorAll('.column-layout').forEach(cl => {
+        cl.removeAttribute('contenteditable');
+        cl.querySelectorAll('.column').forEach(c => c.removeAttribute('contenteditable'));
+      });
+      // Clean task list editability
+      temp.querySelectorAll('.task-list').forEach(tl => {
+        tl.removeAttribute('contenteditable');
+        tl.querySelectorAll('.task-text').forEach(t => t.removeAttribute('contenteditable'));
+      });
+      // Clean video embed editability
+      temp.querySelectorAll('.video-embed').forEach(v => v.removeAttribute('contenteditable'));
+      // Clean status badges editability
+      temp.querySelectorAll('.status').forEach(s => s.removeAttribute('contenteditable'));
       return temp.innerHTML;
     }
 
@@ -2850,6 +3184,370 @@
         updateToolbarState();
       }
     });
+
+    // ===========================
+    //  PHASE 2: CODE BLOCK WITH SYNTAX HIGHLIGHTING
+    // ===========================
+    document.getElementById('insertCodeBlock').addEventListener('click', () => {
+      savedRange = saveSelection();
+      document.getElementById('codeBlockModal').classList.add('visible');
+    });
+    document.getElementById('codeBlockCancel').addEventListener('click', () => {
+      document.getElementById('codeBlockModal').classList.remove('visible');
+    });
+    document.getElementById('codeBlockInsert').addEventListener('click', () => {
+      const lang = document.getElementById('codeBlockLang').value;
+      insertCodeBlock(lang);
+      document.getElementById('codeBlockModal').classList.remove('visible');
+    });
+
+    function insertCodeBlock(lang) {
+      snapshotBeforeAction();
+      const id = 'code-' + Date.now();
+      const html = `<div class="code-block-wrapper" contenteditable="false" id="${id}">` +
+        `<div class="code-block-header">` +
+          `<select class="code-lang-select" data-target="${id}" onchange="updateCodeLang(this)">${getCodeLangOptions(lang)}</select>` +
+          `<button class="code-copy-btn" onclick="copyCodeBlock('${id}')">` +
+            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy` +
+          `</button>` +
+        `</div>` +
+        `<pre><code class="language-${lang}" contenteditable="true">// Type your code here...</code></pre>` +
+      `</div><p><br></p>`;
+      restoreSelection(savedRange);
+      insertAtCursor(html);
+      savedRange = null;
+
+      // Focus the code area
+      setTimeout(() => {
+        const wrapper = document.getElementById(id);
+        if (wrapper) {
+          const code = wrapper.querySelector('code');
+          if (code) {
+            code.focus();
+            // Select all placeholder text
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }, 50);
+      showToast('Code block inserted');
+      snapshotAfterAction();
+    }
+
+    function getCodeLangOptions(selected) {
+      const langs = [
+        ['plaintext','Plain Text'],['javascript','JavaScript'],['typescript','TypeScript'],
+        ['python','Python'],['html','HTML'],['css','CSS'],['json','JSON'],['sql','SQL'],
+        ['bash','Bash'],['java','Java'],['csharp','C#'],['php','PHP'],['ruby','Ruby'],
+        ['go','Go'],['rust','Rust'],['yaml','YAML'],['xml','XML'],['markdown','Markdown'],
+        ['c','C'],['cpp','C++'],['swift','Swift'],['kotlin','Kotlin'],['dart','Dart'],
+        ['r','R'],['dockerfile','Dockerfile']
+      ];
+      return langs.map(([val, label]) =>
+        `<option value="${val}"${val === selected ? ' selected' : ''}>${label}</option>`
+      ).join('');
+    }
+
+    // Global functions for code block buttons (called from onclick in contenteditable="false" elements)
+    window.copyCodeBlock = function(id) {
+      const wrapper = document.getElementById(id);
+      if (!wrapper) return;
+      const code = wrapper.querySelector('code');
+      if (code) {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+          showToast('Code copied to clipboard');
+        });
+      }
+    };
+
+    window.updateCodeLang = function(select) {
+      const id = select.dataset.target;
+      const lang = select.value;
+      const wrapper = document.getElementById(id);
+      if (!wrapper) return;
+      const code = wrapper.querySelector('code');
+      if (code) {
+        // Update the class
+        code.className = 'language-' + lang;
+        code.setAttribute('contenteditable', 'true');
+        // Re-highlight
+        highlightCodeBlock(wrapper);
+      }
+    };
+
+    function highlightCodeBlock(wrapper) {
+      if (typeof hljs === 'undefined') return;
+      const code = wrapper.querySelector('code');
+      if (!code) return;
+      const text = code.textContent;
+      const lang = code.className.replace('language-', '').replace('hljs', '').trim();
+      if (lang && lang !== 'plaintext') {
+        try {
+          const result = hljs.highlight(text, { language: lang, ignoreIllegals: true });
+          code.innerHTML = result.value;
+        } catch(e) {
+          // Fallback: no highlighting
+        }
+      }
+      code.setAttribute('contenteditable', 'true');
+    }
+
+    // Re-highlight code blocks on blur (after editing)
+    visualEditor.addEventListener('focusout', (e) => {
+      if (e.target && e.target.tagName === 'CODE' && e.target.closest('.code-block-wrapper')) {
+        highlightCodeBlock(e.target.closest('.code-block-wrapper'));
+      }
+    });
+
+    // Add code-block-wrapper to block selectors
+    BLOCK_CLASSES.push('code-block-wrapper');
+
+    // ===========================
+    //  PHASE 2: MULTI-COLUMN LAYOUTS
+    // ===========================
+    document.getElementById('insertColumns').addEventListener('click', () => {
+      document.getElementById('columnsModal').classList.add('visible');
+    });
+    document.getElementById('columnsCancel').addEventListener('click', () => {
+      document.getElementById('columnsModal').classList.remove('visible');
+    });
+
+    document.querySelectorAll('.col-layout-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const layout = btn.dataset.layout;
+        insertColumnLayout(layout);
+        document.getElementById('columnsModal').classList.remove('visible');
+      });
+    });
+
+    function insertColumnLayout(layout) {
+      snapshotBeforeAction();
+      let colCount = 2;
+      let cls = '';
+      if (layout === '33-33-33') colCount = 3;
+      if (layout === '70-30') cls = ' cols-70-30';
+      if (layout === '30-70') cls = ' cols-30-70';
+
+      let cols = '';
+      for (let i = 0; i < colCount; i++) {
+        cols += `<div class="column" contenteditable="true"><p>Column ${i + 1} content...</p></div>`;
+      }
+      const html = `<div class="column-layout${cls}" contenteditable="false">${cols}</div><p><br></p>`;
+      insertAtCursor(html);
+      showToast(`${colCount}-column layout inserted`);
+      snapshotAfterAction();
+    }
+
+    BLOCK_CLASSES.push('column-layout');
+
+    // ===========================
+    //  PHASE 2: STATUS BADGES
+    // ===========================
+    let selectedStatusColor = 'blue';
+
+    document.getElementById('insertStatus').addEventListener('click', () => {
+      savedRange = saveSelection();
+      document.getElementById('statusText').value = 'IN PROGRESS';
+      selectedStatusColor = 'blue';
+      updateStatusPreview();
+      updateStatusColorBtns();
+      document.getElementById('statusModal').classList.add('visible');
+    });
+    document.getElementById('statusCancel').addEventListener('click', () => {
+      document.getElementById('statusModal').classList.remove('visible');
+    });
+
+    document.querySelectorAll('#statusColors .status-color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedStatusColor = btn.dataset.color;
+        updateStatusColorBtns();
+        updateStatusPreview();
+      });
+    });
+
+    document.getElementById('statusText').addEventListener('input', updateStatusPreview);
+
+    function updateStatusColorBtns() {
+      document.querySelectorAll('#statusColors .status-color-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.color === selectedStatusColor);
+      });
+    }
+
+    function updateStatusPreview() {
+      const text = document.getElementById('statusText').value || 'STATUS';
+      const preview = document.getElementById('statusPreview');
+      preview.textContent = text;
+      preview.className = 'status ' + selectedStatusColor;
+    }
+
+    document.getElementById('statusInsert').addEventListener('click', () => {
+      const text = document.getElementById('statusText').value.trim() || 'STATUS';
+      snapshotBeforeAction();
+      restoreSelection(savedRange);
+      const html = `<span class="status ${selectedStatusColor}" contenteditable="false">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>&nbsp;`;
+      insertHtmlAtCursor(html);
+      savedRange = null;
+      document.getElementById('statusModal').classList.remove('visible');
+      showToast('Status badge inserted');
+      snapshotAfterAction();
+    });
+
+    // ===========================
+    //  PHASE 2: TASK / CHECKLIST
+    // ===========================
+    document.getElementById('insertTaskList').addEventListener('click', () => {
+      insertTaskList();
+    });
+
+    function insertTaskList() {
+      snapshotBeforeAction();
+      const html = `<ul class="task-list" contenteditable="false">` +
+        `<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Task item 1</span></li>` +
+        `<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Task item 2</span></li>` +
+        `<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Task item 3</span></li>` +
+      `</ul><p><br></p>`;
+      insertAtCursor(html);
+      showToast('Task list inserted');
+      snapshotAfterAction();
+    }
+
+    window.toggleTaskItem = function(checkbox) {
+      const li = checkbox.closest('.task-item');
+      if (li) {
+        li.classList.toggle('checked', checkbox.checked);
+      }
+    };
+
+    // Handle Enter key inside task lists to add new tasks
+    visualEditor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        let node = sel.anchorNode;
+        // Find if we're inside a task-item
+        while (node && node !== visualEditor) {
+          if (node.nodeType === 1 && node.classList && node.classList.contains('task-item')) {
+            e.preventDefault();
+            snapshotBeforeAction();
+            const taskList = node.closest('.task-list');
+            const newLi = document.createElement('li');
+            newLi.className = 'task-item';
+            newLi.innerHTML = '<input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true"></span>';
+            node.parentElement.insertBefore(newLi, node.nextSibling);
+            // Focus new task text
+            const span = newLi.querySelector('.task-text');
+            if (span) placeCursorIn(span);
+            snapshotAfterAction();
+            return;
+          }
+          node = node.parentElement;
+        }
+      }
+
+      // Backspace on empty task item removes it
+      if (e.key === 'Backspace') {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        let node = sel.anchorNode;
+        while (node && node !== visualEditor) {
+          if (node.nodeType === 1 && node.classList && node.classList.contains('task-text')) {
+            if (node.textContent === '' || node.textContent === '\u200B') {
+              const li = node.closest('.task-item');
+              const taskList = li ? li.closest('.task-list') : null;
+              if (li && taskList) {
+                const items = taskList.querySelectorAll('.task-item');
+                if (items.length > 1) {
+                  e.preventDefault();
+                  snapshotBeforeAction();
+                  const prev = li.previousElementSibling;
+                  li.remove();
+                  if (prev) {
+                    const prevText = prev.querySelector('.task-text');
+                    if (prevText) placeCursorIn(prevText);
+                  }
+                  snapshotAfterAction();
+                }
+              }
+            }
+            return;
+          }
+          node = node.parentElement;
+        }
+      }
+    });
+
+    BLOCK_CLASSES.push('task-list');
+
+    // ===========================
+    //  PHASE 2: VIDEO EMBED
+    // ===========================
+    document.getElementById('insertVideo').addEventListener('click', () => {
+      savedRange = saveSelection();
+      document.getElementById('videoUrl').value = '';
+      document.getElementById('videoModal').classList.add('visible');
+      setTimeout(() => document.getElementById('videoUrl').focus(), 50);
+    });
+    document.getElementById('videoCancel').addEventListener('click', () => {
+      document.getElementById('videoModal').classList.remove('visible');
+    });
+    document.getElementById('videoInsert').addEventListener('click', () => {
+      const url = document.getElementById('videoUrl').value.trim();
+      if (!url) { showToast('Please enter a video URL'); return; }
+      const embedUrl = parseVideoUrl(url);
+      if (!embedUrl) { showToast('Unsupported video URL. Use YouTube or Vimeo links.'); return; }
+      insertVideoEmbed(embedUrl);
+      document.getElementById('videoModal').classList.remove('visible');
+    });
+
+    // Also insert on Enter key in the URL input
+    document.getElementById('videoUrl').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('videoInsert').click();
+      }
+    });
+
+    function parseVideoUrl(url) {
+      // YouTube: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+      let match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (match) return `https://www.youtube.com/embed/${match[1]}`;
+
+      // Vimeo: vimeo.com/ID
+      match = url.match(/vimeo\.com\/(\d+)/);
+      if (match) return `https://player.vimeo.com/video/${match[1]}`;
+
+      return null;
+    }
+
+    function insertVideoEmbed(embedUrl) {
+      snapshotBeforeAction();
+      restoreSelection(savedRange);
+      const html = `<div class="video-embed" contenteditable="false">` +
+        `<div class="video-responsive">` +
+          `<iframe src="${embedUrl}" allowfullscreen loading="lazy"></iframe>` +
+        `</div>` +
+      `</div><p><br></p>`;
+      insertAtCursor(html);
+      savedRange = null;
+      showToast('Video embedded');
+      snapshotAfterAction();
+    }
+
+    BLOCK_CLASSES.push('video-embed');
+
+    // ===========================
+    //  PHASE 2: ADD NEW ITEMS TO SLASH COMMANDS
+    // ===========================
+    SLASH_COMMANDS.push(
+      { cat: 'Blocks', name: 'Code Block', desc: 'Syntax highlighted code', icon: '\uD83D\uDCBB', action: () => document.getElementById('insertCodeBlock').click() },
+      { cat: 'Blocks', name: 'Columns', desc: 'Multi-column layout', icon: '\u25EB', action: () => document.getElementById('insertColumns').click() },
+      { cat: 'Blocks', name: 'Task List', desc: 'Checklist with checkboxes', icon: '\u2611', action: () => insertTaskList() },
+      { cat: 'Blocks', name: 'Video', desc: 'Embed YouTube/Vimeo', icon: '\u25B6\uFE0F', action: () => document.getElementById('insertVideo').click() },
+      { cat: 'Inline', name: 'Status Badge', desc: 'Colored status lozenge', icon: '\uD83D\uDFE2', action: () => document.getElementById('insertStatus').click() },
+    );
 
     // Handle triple backtick → code block
     visualEditor.addEventListener('keydown', (e) => {
