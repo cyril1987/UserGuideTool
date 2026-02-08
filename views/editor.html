@@ -906,6 +906,241 @@
       text-align: right;
     }
 
+    /* ===========================
+       PHASE 3: FLOATING FORMAT TOOLBAR
+       =========================== */
+    .float-toolbar {
+      position: absolute;
+      z-index: 999;
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: none;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      animation: floatToolbarIn 0.15s ease;
+    }
+    .float-toolbar.visible { display: flex; }
+    @keyframes floatToolbarIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .float-toolbar::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid #1e293b;
+    }
+    .ft-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 28px;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.1s;
+    }
+    .ft-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+    .ft-btn.active { background: rgba(255,255,255,0.15); color: #60a5fa; }
+    .ft-btn svg {
+      width: 15px; height: 15px;
+      fill: none; stroke: currentColor;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .ft-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 2px; }
+
+    /* ===========================
+       PHASE 3: FIND AND REPLACE
+       =========================== */
+    .find-replace-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+    .find-replace-bar.visible { display: flex; }
+    .find-replace-bar input {
+      padding: 4px 8px;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 13px;
+      width: 180px;
+      outline: none;
+    }
+    .find-replace-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+    .fr-count { color: var(--gray-500); font-size: 12px; min-width: 60px; }
+    .fr-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      border: 1px solid var(--gray-300);
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--gray-600);
+      transition: all 0.1s;
+    }
+    .fr-btn:hover { background: var(--gray-100); color: var(--gray-900); }
+    .fr-btn svg {
+      width: 14px; height: 14px;
+      fill: none; stroke: currentColor;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .find-highlight { background: #fde68a; border-radius: 2px; }
+    .find-highlight-current { background: #f97316; color: white; border-radius: 2px; }
+
+    /* ===========================
+       PHASE 3: WORD / CHARACTER COUNT
+       =========================== */
+    .word-count-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 4px 16px;
+      background: #f8fafc;
+      border-top: 1px solid var(--gray-200);
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    .wc-item { display: flex; align-items: center; gap: 4px; }
+    .wc-label { color: var(--gray-400); }
+
+    /* ===========================
+       PHASE 3: KEYBOARD SHORTCUTS HELP
+       =========================== */
+    .shortcuts-panel {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .shortcuts-panel.visible { display: flex; }
+    .shortcuts-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px 32px;
+      width: 600px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .shortcuts-content h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--gray-900);
+    }
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .shortcut-section { margin-bottom: 12px; }
+    .shortcut-section h4 {
+      font-size: 13px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+    }
+    .shortcut-keys { display: flex; gap: 3px; align-items: center; }
+    .shortcut-key {
+      display: inline-block;
+      padding: 2px 6px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--gray-700);
+      line-height: 1.4;
+    }
+    .shortcut-label { font-size: 13px; color: var(--gray-600); }
+
+    /* ===========================
+       PHASE 3: IMAGE ENHANCEMENTS
+       =========================== */
+    .img-wrapper {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      margin: 8px 0;
+    }
+    .img-wrapper.align-left { float: left; margin-right: 16px; margin-bottom: 8px; }
+    .img-wrapper.align-center { display: block; margin-left: auto; margin-right: auto; text-align: center; }
+    .img-wrapper.align-right { float: right; margin-left: 16px; margin-bottom: 8px; }
+    .img-wrapper img { max-width: 100%; height: auto; display: block; border-radius: 4px; }
+    .img-caption {
+      font-size: 13px;
+      color: var(--gray-500);
+      text-align: center;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox-overlay.visible { display: flex; }
+    .lightbox-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 40px; height: 40px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+    #visual-editor .img-wrapper { cursor: pointer; }
+    #visual-editor .img-wrapper:hover { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
     /* HTML Source editor */
     #source-editor {
       display: none;
@@ -994,6 +1229,12 @@
         <button class="fmt-btn" data-cmd="insertUnorderedList" title="Bullet list">
           <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
         </button>
+        <button class="fmt-btn" id="btnIndent" title="Indent (Tab)">
+          <svg viewBox="0 0 24 24"><path d="M3 8l4 4-4 4"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" id="btnOutdent" title="Outdent (Shift+Tab)">
+          <svg viewBox="0 0 24 24"><path d="M7 8l-4 4 4 4"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
+        </button>
       </div>
       <div class="fmt-group">
         <button class="fmt-btn" data-cmd="createLink" title="Insert link">
@@ -1046,11 +1287,35 @@
       <button class="editor-mode-tab" id="tabSource">HTML Source</button>
     </div>
 
+    <!-- Find and Replace bar -->
+    <div class="find-replace-bar" id="findReplaceBar">
+      <input type="text" id="findInput" placeholder="Find..." autocomplete="off">
+      <span class="fr-count" id="frCount"></span>
+      <button class="fr-btn" id="frPrev" title="Previous (Shift+Enter)">
+        <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+      </button>
+      <button class="fr-btn" id="frNext" title="Next (Enter)">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <input type="text" id="replaceInput" placeholder="Replace..." autocomplete="off" style="display:none;">
+      <button class="fr-btn" id="frReplace" title="Replace" style="display:none;">Replace</button>
+      <button class="fr-btn" id="frReplaceAll" title="Replace all" style="display:none;">All</button>
+      <button class="fr-btn" id="frToggleReplace" title="Toggle replace">R</button>
+      <button class="fr-btn" id="frClose" title="Close (Esc)">&#x2715;</button>
+    </div>
+
     <!-- Visual Editor (contenteditable) -->
     <div id="visual-editor" class="guide-content" contenteditable="true"></div>
 
     <!-- HTML Source Editor -->
     <textarea id="source-editor" spellcheck="false"></textarea>
+
+    <!-- Word / Character Count -->
+    <div class="word-count-bar" id="wordCountBar">
+      <span class="wc-item"><span class="wc-label">Words:</span> <span id="wcWords">0</span></span>
+      <span class="wc-item"><span class="wc-label">Characters:</span> <span id="wcChars">0</span></span>
+      <span class="wc-item"><span class="wc-label">Reading time:</span> <span id="wcTime">0 min</span></span>
+    </div>
   </div>
 
   <!-- Block Action Toolbar (floating) -->
@@ -1296,6 +1561,101 @@
         <button class="btn btn-primary btn-sm" id="codeBlockInsert">Insert</button>
       </div>
     </div>
+  </div>
+
+  <!-- Floating Format Toolbar (on text selection) -->
+  <div class="float-toolbar" id="floatToolbar">
+    <button class="ft-btn" data-ft="bold" title="Bold"><b>B</b></button>
+    <button class="ft-btn" data-ft="italic" title="Italic"><i>I</i></button>
+    <button class="ft-btn" data-ft="underline" title="Underline"><u>U</u></button>
+    <button class="ft-btn" data-ft="strikeThrough" title="Strikethrough"><s>S</s></button>
+    <div class="ft-sep"></div>
+    <button class="ft-btn" id="ftLink" title="Link">
+      <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+    </button>
+    <button class="ft-btn" id="ftCode" title="Inline code" style="font-family:monospace;font-size:12px;">&lt;/&gt;</button>
+  </div>
+
+  <!-- Keyboard Shortcuts Help Panel -->
+  <div class="shortcuts-panel" id="shortcutsPanel">
+    <div class="shortcuts-content">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcuts-grid">
+        <div class="shortcut-section">
+          <h4>Text Formatting</h4>
+          <div class="shortcut-row"><span class="shortcut-label">Bold</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">B</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Italic</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">I</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Underline</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">U</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Inline Code</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">E</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Link</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">K</span></span></div>
+        </div>
+        <div class="shortcut-section">
+          <h4>Blocks</h4>
+          <div class="shortcut-row"><span class="shortcut-label">Heading 1</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Alt</span>+<span class="shortcut-key">1</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Heading 2</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Alt</span>+<span class="shortcut-key">2</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Heading 3</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Alt</span>+<span class="shortcut-key">3</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Heading 4&#x2013;6</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Alt</span>+<span class="shortcut-key">4-6</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Paragraph</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Alt</span>+<span class="shortcut-key">0</span></span></div>
+        </div>
+        <div class="shortcut-section">
+          <h4>Lists</h4>
+          <div class="shortcut-row"><span class="shortcut-label">Bullet List</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Shift</span>+<span class="shortcut-key">8</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Numbered List</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Shift</span>+<span class="shortcut-key">7</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Indent</span><span class="shortcut-keys"><span class="shortcut-key">Tab</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Outdent</span><span class="shortcut-keys"><span class="shortcut-key">Shift</span>+<span class="shortcut-key">Tab</span></span></div>
+        </div>
+        <div class="shortcut-section">
+          <h4>General</h4>
+          <div class="shortcut-row"><span class="shortcut-label">Save</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">S</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Undo</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Z</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Redo</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">Y</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Find</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">F</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Find &amp; Replace</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">H</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Shortcuts Help</span><span class="shortcut-keys"><span class="shortcut-key">Ctrl</span>+<span class="shortcut-key">/</span></span></div>
+          <div class="shortcut-row"><span class="shortcut-label">Slash Commands</span><span class="shortcut-keys"><span class="shortcut-key">/</span></span></div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn btn-secondary btn-sm" id="shortcutsClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Edit Modal -->
+  <div class="modal-overlay" id="imageEditModal">
+    <div class="modal">
+      <h3>Edit Image</h3>
+      <div style="text-align:center;margin-bottom:12px;">
+        <img id="imgEditPreview" src="" style="max-width:100%;max-height:200px;border-radius:4px;">
+      </div>
+      <div class="form-group">
+        <label for="imgAltText">Alt Text</label>
+        <input type="text" id="imgAltText" placeholder="Describe the image...">
+      </div>
+      <div class="form-group">
+        <label for="imgCaption">Caption (optional)</label>
+        <input type="text" id="imgCaption" placeholder="Image caption...">
+      </div>
+      <div class="form-group">
+        <label for="imgAlign">Alignment</label>
+        <select id="imgAlign" class="fmt-select" style="width:100%;height:36px;font-size:14px;">
+          <option value="none">Default (inline)</option>
+          <option value="align-left">Float Left</option>
+          <option value="align-center">Center</option>
+          <option value="align-right">Float Right</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="imgEditCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="imgEditSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Overlay -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <button class="lightbox-close" id="lightboxClose">&#x2715;</button>
+    <img id="lightboxImg" src="">
   </div>
 
   <!-- Slash Command Menu -->
@@ -2635,6 +2995,17 @@
       temp.querySelectorAll('.video-embed').forEach(v => v.removeAttribute('contenteditable'));
       // Clean status badges editability
       temp.querySelectorAll('.status').forEach(s => s.removeAttribute('contenteditable'));
+      // Clean find/replace highlights
+      temp.querySelectorAll('.find-highlight, .find-highlight-current').forEach(mark => {
+        const text = document.createTextNode(mark.textContent);
+        mark.replaceWith(text);
+      });
+      // Clean image wrapper editability
+      temp.querySelectorAll('.img-wrapper').forEach(w => {
+        w.removeAttribute('contenteditable');
+        const cap = w.querySelector('.img-caption');
+        if (cap) cap.removeAttribute('contenteditable');
+      });
       return temp.innerHTML;
     }
 
@@ -3579,6 +3950,487 @@
         updateToolbarState();
       }
     });
+
+    // ===========================
+    //  PHASE 3: FLOATING FORMAT TOOLBAR
+    // ===========================
+    const floatToolbar = document.getElementById('floatToolbar');
+    let floatToolbarVisible = false;
+
+    function showFloatToolbar() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) { hideFloatToolbar(); return; }
+      // Only show if selection is within the visual editor
+      let node = sel.anchorNode;
+      while (node && node !== document.body) {
+        if (node === visualEditor) break;
+        node = node.parentElement;
+      }
+      if (node !== visualEditor) { hideFloatToolbar(); return; }
+
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      if (rect.width === 0) { hideFloatToolbar(); return; }
+
+      floatToolbar.classList.add('visible');
+      floatToolbarVisible = true;
+
+      // Position above selection
+      const tbRect = floatToolbar.getBoundingClientRect();
+      let left = rect.left + (rect.width / 2) - (tbRect.width / 2);
+      let top = rect.top - tbRect.height - 10 + window.scrollY;
+      if (left < 8) left = 8;
+      if (left + tbRect.width > window.innerWidth - 8) left = window.innerWidth - tbRect.width - 8;
+      if (top < 0) top = rect.bottom + 10 + window.scrollY;
+
+      floatToolbar.style.left = left + 'px';
+      floatToolbar.style.top = top + 'px';
+      updateFloatToolbarState();
+    }
+
+    function hideFloatToolbar() {
+      floatToolbar.classList.remove('visible');
+      floatToolbarVisible = false;
+    }
+
+    function updateFloatToolbarState() {
+      floatToolbar.querySelectorAll('.ft-btn[data-ft]').forEach(btn => {
+        btn.classList.toggle('active', document.queryCommandState(btn.dataset.ft));
+      });
+    }
+
+    visualEditor.addEventListener('mouseup', () => {
+      setTimeout(showFloatToolbar, 10);
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      if (floatToolbarVisible && !floatToolbar.contains(e.target)) {
+        hideFloatToolbar();
+      }
+    });
+
+    floatToolbar.querySelectorAll('.ft-btn[data-ft]').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        snapshotBeforeAction();
+        document.execCommand(btn.dataset.ft, false, null);
+        updateFloatToolbarState();
+        updateToolbarState();
+        snapshotAfterAction();
+      });
+    });
+
+    document.getElementById('ftLink').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const url = prompt('Enter URL:');
+      if (url) {
+        snapshotBeforeAction();
+        document.execCommand('createLink', false, url);
+        snapshotAfterAction();
+      }
+    });
+
+    document.getElementById('ftCode').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      applyInlineCode();
+    });
+
+    // ===========================
+    //  PHASE 3: FIND AND REPLACE
+    // ===========================
+    const findReplaceBar = document.getElementById('findReplaceBar');
+    const findInput = document.getElementById('findInput');
+    const replaceInput = document.getElementById('replaceInput');
+    const frCount = document.getElementById('frCount');
+    let findMatches = [];
+    let findCurrentIdx = -1;
+    let findReplaceMode = false;
+
+    function openFindBar(withReplace) {
+      findReplaceBar.classList.add('visible');
+      findReplaceMode = !!withReplace;
+      replaceInput.style.display = withReplace ? '' : 'none';
+      document.getElementById('frReplace').style.display = withReplace ? '' : 'none';
+      document.getElementById('frReplaceAll').style.display = withReplace ? '' : 'none';
+      setTimeout(() => findInput.focus(), 50);
+      const sel = window.getSelection();
+      if (sel.rangeCount && !sel.isCollapsed) {
+        findInput.value = sel.toString().substring(0, 100);
+      }
+      runFind();
+    }
+
+    function closeFindBar() {
+      findReplaceBar.classList.remove('visible');
+      clearFindHighlights();
+      findMatches = [];
+      findCurrentIdx = -1;
+      frCount.textContent = '';
+    }
+
+    function clearFindHighlights() {
+      visualEditor.querySelectorAll('.find-highlight, .find-highlight-current').forEach(mark => {
+        const text = document.createTextNode(mark.textContent);
+        mark.replaceWith(text);
+      });
+      visualEditor.normalize();
+    }
+
+    function runFind() {
+      clearFindHighlights();
+      findMatches = [];
+      findCurrentIdx = -1;
+      const query = findInput.value;
+      if (!query) { frCount.textContent = ''; return; }
+
+      const walker = document.createTreeWalker(visualEditor, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+      const lowerQuery = query.toLowerCase();
+      textNodes.forEach(node => {
+        const text = node.textContent;
+        const lower = text.toLowerCase();
+        let idx = 0;
+        const parts = [];
+        let lastEnd = 0;
+        while ((idx = lower.indexOf(lowerQuery, idx)) !== -1) {
+          if (idx > lastEnd) parts.push({ text: text.substring(lastEnd, idx), match: false });
+          parts.push({ text: text.substring(idx, idx + query.length), match: true });
+          lastEnd = idx + query.length;
+          idx = lastEnd;
+        }
+        if (parts.length > 0) {
+          if (lastEnd < text.length) parts.push({ text: text.substring(lastEnd), match: false });
+          const frag = document.createDocumentFragment();
+          parts.forEach(p => {
+            if (p.match) {
+              const mark = document.createElement('mark');
+              mark.className = 'find-highlight';
+              mark.textContent = p.text;
+              frag.appendChild(mark);
+              findMatches.push(mark);
+            } else {
+              frag.appendChild(document.createTextNode(p.text));
+            }
+          });
+          node.parentNode.replaceChild(frag, node);
+        }
+      });
+
+      if (findMatches.length > 0) {
+        findCurrentIdx = 0;
+        highlightCurrentMatch();
+      }
+      updateFindCount();
+    }
+
+    function highlightCurrentMatch() {
+      findMatches.forEach((m, i) => {
+        m.className = i === findCurrentIdx ? 'find-highlight-current' : 'find-highlight';
+      });
+      if (findMatches[findCurrentIdx]) {
+        findMatches[findCurrentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function updateFindCount() {
+      if (findMatches.length === 0) {
+        frCount.textContent = findInput.value ? 'No results' : '';
+      } else {
+        frCount.textContent = (findCurrentIdx + 1) + ' of ' + findMatches.length;
+      }
+    }
+
+    function findNext() {
+      if (findMatches.length === 0) return;
+      findCurrentIdx = (findCurrentIdx + 1) % findMatches.length;
+      highlightCurrentMatch();
+      updateFindCount();
+    }
+
+    function findPrev() {
+      if (findMatches.length === 0) return;
+      findCurrentIdx = (findCurrentIdx - 1 + findMatches.length) % findMatches.length;
+      highlightCurrentMatch();
+      updateFindCount();
+    }
+
+    function replaceCurrent() {
+      if (findMatches.length === 0 || findCurrentIdx < 0) return;
+      snapshotBeforeAction();
+      const mark = findMatches[findCurrentIdx];
+      const text = document.createTextNode(replaceInput.value);
+      mark.replaceWith(text);
+      findMatches.splice(findCurrentIdx, 1);
+      if (findCurrentIdx >= findMatches.length) findCurrentIdx = 0;
+      if (findMatches.length > 0) highlightCurrentMatch();
+      updateFindCount();
+      snapshotAfterAction();
+    }
+
+    function replaceAll() {
+      if (findMatches.length === 0) return;
+      snapshotBeforeAction();
+      findMatches.forEach(mark => {
+        const text = document.createTextNode(replaceInput.value);
+        mark.replaceWith(text);
+      });
+      findMatches = [];
+      findCurrentIdx = -1;
+      updateFindCount();
+      visualEditor.normalize();
+      snapshotAfterAction();
+      showToast('All replaced');
+    }
+
+    findInput.addEventListener('input', () => runFind());
+    document.getElementById('frNext').addEventListener('click', findNext);
+    document.getElementById('frPrev').addEventListener('click', findPrev);
+    document.getElementById('frReplace').addEventListener('click', replaceCurrent);
+    document.getElementById('frReplaceAll').addEventListener('click', replaceAll);
+    document.getElementById('frClose').addEventListener('click', closeFindBar);
+    document.getElementById('frToggleReplace').addEventListener('click', () => {
+      findReplaceMode = !findReplaceMode;
+      replaceInput.style.display = findReplaceMode ? '' : 'none';
+      document.getElementById('frReplace').style.display = findReplaceMode ? '' : 'none';
+      document.getElementById('frReplaceAll').style.display = findReplaceMode ? '' : 'none';
+    });
+    findInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); e.shiftKey ? findPrev() : findNext(); }
+      if (e.key === 'Escape') { e.preventDefault(); closeFindBar(); visualEditor.focus(); }
+    });
+    replaceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); replaceCurrent(); }
+      if (e.key === 'Escape') { e.preventDefault(); closeFindBar(); visualEditor.focus(); }
+    });
+
+    // ===========================
+    //  PHASE 3: WORD / CHARACTER COUNT
+    // ===========================
+    const wcWords = document.getElementById('wcWords');
+    const wcChars = document.getElementById('wcChars');
+    const wcTime = document.getElementById('wcTime');
+
+    function updateWordCount() {
+      const text = visualEditor.textContent || '';
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const readingTime = Math.max(1, Math.ceil(words / 200));
+      wcWords.textContent = words.toLocaleString();
+      wcChars.textContent = chars.toLocaleString();
+      wcTime.textContent = readingTime + ' min';
+    }
+
+    updateWordCount();
+    let wcTimer = null;
+    visualEditor.addEventListener('input', () => {
+      clearTimeout(wcTimer);
+      wcTimer = setTimeout(updateWordCount, 300);
+    });
+
+    // ===========================
+    //  PHASE 3: EXPANDED KEYBOARD SHORTCUTS
+    // ===========================
+    const shortcutsPanel = document.getElementById('shortcutsPanel');
+    document.getElementById('shortcutsClose').addEventListener('click', () => {
+      shortcutsPanel.classList.remove('visible');
+    });
+    shortcutsPanel.addEventListener('click', (e) => {
+      if (e.target === shortcutsPanel) shortcutsPanel.classList.remove('visible');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+/ — toggle shortcuts panel
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        shortcutsPanel.classList.toggle('visible');
+        return;
+      }
+      // Only apply editor shortcuts when visual editor is active
+      if (currentMode !== 'visual') return;
+      if (document.activeElement !== visualEditor && !visualEditor.contains(document.activeElement)) return;
+
+      // Ctrl+F — Find
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        openFindBar(false);
+        return;
+      }
+      // Ctrl+H — Find & Replace
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        openFindBar(true);
+        return;
+      }
+      // Ctrl+K — Insert link
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const url = prompt('Enter URL:');
+        if (url) {
+          snapshotBeforeAction();
+          document.execCommand('createLink', false, url);
+          snapshotAfterAction();
+        }
+        return;
+      }
+      // Ctrl+Shift+8 — Bullet list
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '8') {
+        e.preventDefault();
+        snapshotBeforeAction();
+        document.execCommand('insertUnorderedList', false, null);
+        snapshotAfterAction();
+        return;
+      }
+      // Ctrl+Shift+7 — Numbered list
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '7') {
+        e.preventDefault();
+        snapshotBeforeAction();
+        document.execCommand('insertOrderedList', false, null);
+        snapshotAfterAction();
+        return;
+      }
+      // Ctrl+Alt+1-6 — Headings
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key >= '1' && e.key <= '6') {
+        e.preventDefault();
+        snapshotBeforeAction();
+        document.execCommand('formatBlock', false, '<h' + e.key + '>');
+        document.getElementById('blockType').value = 'h' + e.key;
+        snapshotAfterAction();
+        return;
+      }
+      // Ctrl+Alt+0 — Paragraph
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === '0') {
+        e.preventDefault();
+        snapshotBeforeAction();
+        document.execCommand('formatBlock', false, '<p>');
+        document.getElementById('blockType').value = 'p';
+        snapshotAfterAction();
+        return;
+      }
+    });
+
+    // ===========================
+    //  PHASE 3: IMAGE ENHANCEMENTS
+    // ===========================
+    let editingImage = null;
+
+    visualEditor.addEventListener('dblclick', (e) => {
+      let target = e.target;
+      if (target.tagName !== 'IMG') return;
+      editingImage = target;
+      const wrapper = target.closest('.img-wrapper');
+      document.getElementById('imgEditPreview').src = target.src;
+      document.getElementById('imgAltText').value = target.alt || '';
+      if (wrapper) {
+        const caption = wrapper.querySelector('.img-caption');
+        document.getElementById('imgCaption').value = caption ? caption.textContent : '';
+        if (wrapper.classList.contains('align-left')) document.getElementById('imgAlign').value = 'align-left';
+        else if (wrapper.classList.contains('align-center')) document.getElementById('imgAlign').value = 'align-center';
+        else if (wrapper.classList.contains('align-right')) document.getElementById('imgAlign').value = 'align-right';
+        else document.getElementById('imgAlign').value = 'none';
+      } else {
+        document.getElementById('imgCaption').value = '';
+        document.getElementById('imgAlign').value = 'none';
+      }
+      document.getElementById('imageEditModal').classList.add('visible');
+    });
+
+    document.getElementById('imgEditCancel').addEventListener('click', () => {
+      document.getElementById('imageEditModal').classList.remove('visible');
+      editingImage = null;
+    });
+
+    document.getElementById('imgEditSave').addEventListener('click', () => {
+      if (!editingImage) return;
+      snapshotBeforeAction();
+      const alt = document.getElementById('imgAltText').value;
+      const caption = document.getElementById('imgCaption').value.trim();
+      const align = document.getElementById('imgAlign').value;
+      editingImage.alt = alt;
+
+      let wrapper = editingImage.closest('.img-wrapper');
+      const needsWrapper = caption || align !== 'none';
+
+      if (needsWrapper) {
+        if (!wrapper) {
+          wrapper = document.createElement('div');
+          wrapper.className = 'img-wrapper';
+          wrapper.setAttribute('contenteditable', 'false');
+          editingImage.parentNode.insertBefore(wrapper, editingImage);
+          wrapper.appendChild(editingImage);
+        }
+        wrapper.classList.remove('align-left', 'align-center', 'align-right');
+        if (align !== 'none') wrapper.classList.add(align);
+        let capEl = wrapper.querySelector('.img-caption');
+        if (caption) {
+          if (!capEl) {
+            capEl = document.createElement('div');
+            capEl.className = 'img-caption';
+            wrapper.appendChild(capEl);
+          }
+          capEl.textContent = caption;
+        } else if (capEl) {
+          capEl.remove();
+        }
+      } else if (wrapper && !needsWrapper) {
+        wrapper.replaceWith(editingImage);
+      }
+
+      document.getElementById('imageEditModal').classList.remove('visible');
+      editingImage = null;
+      snapshotAfterAction();
+    });
+
+    BLOCK_CLASSES.push('img-wrapper');
+
+    // ===========================
+    //  PHASE 3: INDENT / OUTDENT
+    // ===========================
+    document.getElementById('btnIndent').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      snapshotBeforeAction();
+      document.execCommand('indent', false, null);
+      snapshotAfterAction();
+    });
+
+    document.getElementById('btnOutdent').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      snapshotBeforeAction();
+      document.execCommand('outdent', false, null);
+      snapshotAfterAction();
+    });
+
+    // Tab to indent, Shift+Tab to outdent in lists
+    visualEditor.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      let node = sel.anchorNode;
+      while (node && node !== visualEditor) {
+        if (node.nodeType === 1 && (node.tagName === 'LI' || node.tagName === 'UL' || node.tagName === 'OL')) {
+          e.preventDefault();
+          snapshotBeforeAction();
+          if (e.shiftKey) {
+            document.execCommand('outdent', false, null);
+          } else {
+            document.execCommand('indent', false, null);
+          }
+          snapshotAfterAction();
+          return;
+        }
+        node = node.parentElement;
+      }
+    });
+
+    // ===========================
+    //  PHASE 3: ADD TO SLASH COMMANDS
+    // ===========================
+    SLASH_COMMANDS.push(
+      { cat: 'Actions', name: 'Find', desc: 'Search text in editor', icon: '\uD83D\uDD0D', action: () => openFindBar(false) },
+      { cat: 'Actions', name: 'Find & Replace', desc: 'Search and replace text', icon: '\uD83D\uDD04', action: () => openFindBar(true) },
+      { cat: 'Actions', name: 'Keyboard Shortcuts', desc: 'Show all shortcuts', icon: '\u2328', action: () => shortcutsPanel.classList.add('visible') },
+    );
   </script>
 </body>
 </html>

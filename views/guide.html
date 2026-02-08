@@ -30,6 +30,12 @@
     </main>
   </div>
 
+  <!-- Lightbox Overlay -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <button class="lightbox-close" id="lightboxClose">&#x2715;</button>
+    <img id="lightboxImg" src="">
+  </div>
+
   <script>
     const isAdmin = {{isAdmin}};
     const slug = '{{slug}}';
@@ -265,6 +271,34 @@
         const li = cb.closest('.task-item');
         if (li) li.classList.toggle('checked', cb.checked);
       });
+    });
+
+    // --- Image lightbox ---
+    const lightboxOverlay = document.getElementById('lightboxOverlay');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    document.getElementById('guideContent').addEventListener('click', (e) => {
+      if (e.target.tagName === 'IMG') {
+        lightboxImg.src = e.target.src;
+        lightboxOverlay.classList.add('visible');
+      }
+    });
+
+    lightboxOverlay.addEventListener('click', (e) => {
+      if (e.target === lightboxOverlay || e.target === lightboxClose) {
+        lightboxOverlay.classList.remove('visible');
+      }
+    });
+
+    lightboxClose.addEventListener('click', () => {
+      lightboxOverlay.classList.remove('visible');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightboxOverlay.classList.contains('visible')) {
+        lightboxOverlay.classList.remove('visible');
+      }
     });
   </script>
 </body>
