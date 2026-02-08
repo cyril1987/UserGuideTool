@@ -44,11 +44,13 @@
     if (isAdmin) {
       document.getElementById('navActions').innerHTML = `
         <a href="/admin/guide/${slug}" class="btn btn-primary btn-sm">Edit Guide</a>
+        <a href="/guide/${slug}/print" target="_blank" class="btn btn-secondary btn-sm">&#x1F5A8; Print</a>
         <a href="/" class="btn btn-secondary btn-sm">All Guides</a>
         <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
       `;
     } else {
       document.getElementById('navActions').innerHTML = `
+        <a href="/guide/${slug}/print" target="_blank" class="btn btn-secondary btn-sm">&#x1F5A8; Print</a>
         <a href="/" class="btn btn-secondary btn-sm">All Guides</a>
       `;
     }

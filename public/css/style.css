@@ -1317,6 +1317,25 @@ a:hover {
 .lightbox-close:hover { background: rgba(255,255,255,0.2); }
 
 /* ===========================
+   PRINT STYLES
+   =========================== */
+@media print {
+  .navbar, .guide-sidebar, .search-container, .lightbox-overlay,
+  .navbar-actions, #navActions { display: none !important; }
+  body { background: white; }
+  .guide-layout { display: block !important; max-width: none !important; padding: 0 !important; }
+  .guide-content { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+  .guide-content img { max-width: 100% !important; }
+  .guide-content .code-block-wrapper { break-inside: avoid; }
+  .guide-content table { break-inside: avoid; }
+  .guide-content .callout { break-inside: avoid; }
+  .guide-content .card { break-inside: avoid; }
+  .guide-content details { break-inside: avoid; }
+  .guide-content .column-layout { break-inside: avoid; }
+  a[href]::after { content: none !important; }
+}
+
+/* ===========================
    EDITOR PAGE
    =========================== */
 

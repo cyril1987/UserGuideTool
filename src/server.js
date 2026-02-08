@@ -213,11 +213,16 @@ app.get('/admin/guide/:slug', requireAuth, (req, res) => {
   }));
 });
 
-// Save guide
+// Save guide (with version history)
 app.post('/admin/guide/:slug/save', requireAuth, (req, res) => {
   const { title, content } = req.body;
   const guide = db.getGuideBySlug(req.params.slug);
   if (!guide) return res.status(404).json({ error: 'Guide not found' });
+
+  // Save previous state as a version before overwriting
+  if (guide.content) {
+    db.saveVersion(guide.id, guide.title, guide.content);
+  }
 
   db.updateGuide(req.params.slug, title, content);
   res.json({ success: true });
@@ -227,6 +232,66 @@ app.post('/admin/guide/:slug/save', requireAuth, (req, res) => {
 app.post('/admin/guide/:slug/delete', requireAuth, (req, res) => {
   db.deleteGuide(req.params.slug);
   res.json({ success: true });
+});
+
+// Version history API
+app.get('/admin/guide/:slug/versions', requireAuth, (req, res) => {
+  const guide = db.getGuideBySlug(req.params.slug);
+  if (!guide) return res.status(404).json({ error: 'Guide not found' });
+  const versions = db.getVersions(guide.id);
+  res.json({ versions });
+});
+
+app.get('/admin/guide/:slug/version/:id', requireAuth, (req, res) => {
+  const version = db.getVersion(req.params.id);
+  if (!version) return res.status(404).json({ error: 'Version not found' });
+  res.json({ version });
+});
+
+app.post('/admin/guide/:slug/version/:id/restore', requireAuth, (req, res) => {
+  const guide = db.getGuideBySlug(req.params.slug);
+  if (!guide) return res.status(404).json({ error: 'Guide not found' });
+  const version = db.getVersion(req.params.id);
+  if (!version) return res.status(404).json({ error: 'Version not found' });
+
+  // Save current state as a version before restoring
+  if (guide.content) {
+    db.saveVersion(guide.id, guide.title, guide.content);
+  }
+
+  db.updateGuide(req.params.slug, version.title, version.content);
+  res.json({ success: true, title: version.title, content: version.content });
+});
+
+// Duplicate guide
+app.post('/admin/guide/:slug/duplicate', requireAuth, (req, res) => {
+  const guide = db.getGuideBySlug(req.params.slug);
+  if (!guide) return res.status(404).json({ error: 'Guide not found' });
+
+  const newTitle = guide.title + ' (Copy)';
+  let newSlug = slugify(newTitle);
+  let counter = 1;
+  while (db.getGuideBySlug(newSlug)) {
+    counter++;
+    newSlug = slugify(newTitle) + '-' + counter;
+  }
+
+  db.createGuide(newTitle, newSlug);
+  db.updateGuide(newSlug, newTitle, guide.content);
+  res.json({ success: true, slug: newSlug });
+});
+
+// Print-friendly view
+app.get('/guide/:slug/print', (req, res) => {
+  const guide = db.getGuideBySlug(req.params.slug);
+  if (!guide) return res.status(404).send(renderTemplate('404.html'));
+
+  const html = renderTemplate('print.html', {
+    title: escapeHtml(guide.title),
+    content: guide.content,
+    slug: guide.slug
+  });
+  res.send(html);
 });
 
 // Image upload

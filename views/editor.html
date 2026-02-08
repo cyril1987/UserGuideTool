@@ -1141,6 +1141,108 @@
     #visual-editor .img-wrapper { cursor: pointer; }
     #visual-editor .img-wrapper:hover { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 
+    /* ===========================
+       PHASE 4: VERSION HISTORY PANEL
+       =========================== */
+    .version-panel {
+      position: fixed;
+      top: 0; right: -420px;
+      width: 420px;
+      height: 100vh;
+      background: white;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 1200;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s ease;
+    }
+    .version-panel.visible { right: 0; }
+    .version-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .version-panel-header h3 { font-size: 16px; margin: 0; color: var(--gray-900); }
+    .version-panel-close {
+      width: 32px; height: 32px; border: none; background: none;
+      cursor: pointer; border-radius: 4px; color: var(--gray-500);
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+    }
+    .version-panel-close:hover { background: var(--gray-100); }
+    .version-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    .version-item {
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.1s;
+      border: 1px solid transparent;
+      margin-bottom: 4px;
+    }
+    .version-item:hover { background: var(--gray-50); }
+    .version-item.selected { background: var(--primary-light); border-color: var(--primary); }
+    .version-item-date { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .version-item-title { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+    .version-preview {
+      border-top: 1px solid var(--gray-200);
+      max-height: 45vh;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .version-preview-content {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .version-actions {
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .version-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+    .version-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 1199;
+      display: none;
+    }
+    .version-overlay.visible { display: block; }
+
+    /* ===========================
+       PHASE 4: TEMPLATE PICKER
+       =========================== */
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .template-card {
+      padding: 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      background: white;
+    }
+    .template-card:hover { border-color: var(--primary); background: var(--primary-light); }
+    .template-card-icon { font-size: 24px; margin-bottom: 8px; }
+    .template-card-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .template-card-desc { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
     /* HTML Source editor */
     #source-editor {
       display: none;
@@ -1182,6 +1284,8 @@
       <div class="editor-actions">
         <span class="save-status" id="saveStatus"></span>
         <button class="btn btn-danger btn-sm" id="deleteBtn" style="display:none;">Delete</button>
+        <button class="btn btn-secondary btn-sm" id="duplicateBtn" style="display:none;">Duplicate</button>
+        <button class="btn btn-secondary btn-sm" id="historyBtn" style="display:none;">History</button>
         <button class="btn btn-secondary btn-sm" id="previewBtn">Preview</button>
         <button class="btn btn-primary btn-sm" id="saveBtn">Save</button>
       </div>
@@ -1279,6 +1383,7 @@
       <button class="insert-btn" id="insertVideo" title="Embed YouTube/Vimeo video">&#x25B6;&#xFE0F; Video</button>
       <button class="insert-btn" id="insertImage" title="Upload an image">&#x1F4F7; Image</button>
       <button class="insert-btn" id="insertHR" title="Insert horizontal rule">&#x2015; Divider</button>
+      <button class="insert-btn" id="insertTemplate" title="Load a guide template">&#x1F4D1; Template</button>
     </div>
 
     <!-- Editor mode tabs -->
@@ -1559,6 +1664,37 @@
       <div class="modal-actions">
         <button class="btn btn-secondary btn-sm" id="codeBlockCancel">Cancel</button>
         <button class="btn btn-primary btn-sm" id="codeBlockInsert">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version History Panel (slide-in) -->
+  <div class="version-overlay" id="versionOverlay"></div>
+  <div class="version-panel" id="versionPanel">
+    <div class="version-panel-header">
+      <h3>Version History</h3>
+      <button class="version-panel-close" id="versionClose">&#x2715;</button>
+    </div>
+    <div class="version-list" id="versionList">
+      <div class="version-empty">No versions yet. Versions are created each time you save.</div>
+    </div>
+    <div class="version-preview" id="versionPreview" style="display:none;">
+      <div class="version-preview-content guide-content" id="versionPreviewContent"></div>
+    </div>
+    <div class="version-actions" id="versionActions" style="display:none;">
+      <button class="btn btn-secondary btn-sm" id="versionPreviewClose">Back</button>
+      <button class="btn btn-primary btn-sm" id="versionRestore">Restore this version</button>
+    </div>
+  </div>
+
+  <!-- Template Picker Modal -->
+  <div class="modal-overlay" id="templateModal">
+    <div class="modal" style="width:520px;">
+      <h3>Choose a Template</h3>
+      <p style="font-size:13px; color:var(--gray-500); margin-bottom:12px;">Select a template to populate your guide. This will replace the current content.</p>
+      <div class="template-grid" id="templateGrid"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="templateCancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -4430,6 +4566,313 @@
       { cat: 'Actions', name: 'Find', desc: 'Search text in editor', icon: '\uD83D\uDD0D', action: () => openFindBar(false) },
       { cat: 'Actions', name: 'Find & Replace', desc: 'Search and replace text', icon: '\uD83D\uDD04', action: () => openFindBar(true) },
       { cat: 'Actions', name: 'Keyboard Shortcuts', desc: 'Show all shortcuts', icon: '\u2328', action: () => shortcutsPanel.classList.add('visible') },
+    );
+
+    // ===========================
+    //  PHASE 4: VERSION HISTORY & RESTORE
+    // ===========================
+    const versionPanel = document.getElementById('versionPanel');
+    const versionOverlay = document.getElementById('versionOverlay');
+    const versionList = document.getElementById('versionList');
+    const versionPreview = document.getElementById('versionPreview');
+    const versionPreviewContent = document.getElementById('versionPreviewContent');
+    const versionActions = document.getElementById('versionActions');
+    let selectedVersionId = null;
+
+    // Show history/duplicate buttons only for existing guides
+    if (!isNew) {
+      document.getElementById('historyBtn').style.display = 'inline-flex';
+      document.getElementById('duplicateBtn').style.display = 'inline-flex';
+    }
+
+    document.getElementById('historyBtn').addEventListener('click', openVersionPanel);
+    document.getElementById('versionClose').addEventListener('click', closeVersionPanel);
+    document.getElementById('versionOverlay').addEventListener('click', closeVersionPanel);
+
+    function openVersionPanel() {
+      versionPanel.classList.add('visible');
+      versionOverlay.classList.add('visible');
+      loadVersions();
+    }
+
+    function closeVersionPanel() {
+      versionPanel.classList.remove('visible');
+      versionOverlay.classList.remove('visible');
+      versionPreview.style.display = 'none';
+      versionActions.style.display = 'none';
+      selectedVersionId = null;
+    }
+
+    async function loadVersions() {
+      try {
+        const res = await fetch(`/admin/guide/${currentSlug}/versions`);
+        const data = await res.json();
+        if (data.versions && data.versions.length > 0) {
+          versionList.innerHTML = data.versions.map(v => {
+            const date = new Date(v.created_at);
+            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            return `<div class="version-item" data-id="${v.id}">
+              <div class="version-item-date">${dateStr}</div>
+              <div class="version-item-title">${escapeHtml(v.title)}</div>
+            </div>`;
+          }).join('');
+          // Add click handlers
+          versionList.querySelectorAll('.version-item').forEach(item => {
+            item.addEventListener('click', () => loadVersionPreview(item.dataset.id));
+          });
+        } else {
+          versionList.innerHTML = '<div class="version-empty">No versions yet. Versions are created each time you save.</div>';
+        }
+      } catch (err) {
+        versionList.innerHTML = '<div class="version-empty">Error loading versions.</div>';
+      }
+    }
+
+    async function loadVersionPreview(versionId) {
+      selectedVersionId = versionId;
+      // Highlight selected
+      versionList.querySelectorAll('.version-item').forEach(i => i.classList.remove('selected'));
+      versionList.querySelector(`[data-id="${versionId}"]`).classList.add('selected');
+      try {
+        const res = await fetch(`/admin/guide/${currentSlug}/version/${versionId}`);
+        const data = await res.json();
+        if (data.version) {
+          versionPreviewContent.innerHTML = data.version.content;
+          versionPreview.style.display = 'block';
+          versionActions.style.display = 'flex';
+        }
+      } catch (err) {
+        showToast('Error loading version');
+      }
+    }
+
+    document.getElementById('versionPreviewClose').addEventListener('click', () => {
+      versionPreview.style.display = 'none';
+      versionActions.style.display = 'none';
+      selectedVersionId = null;
+      versionList.querySelectorAll('.version-item').forEach(i => i.classList.remove('selected'));
+    });
+
+    document.getElementById('versionRestore').addEventListener('click', async () => {
+      if (!selectedVersionId) return;
+      if (!confirm('Restore this version? Your current content will be saved as a version first.')) return;
+      try {
+        const res = await fetch(`/admin/guide/${currentSlug}/version/${selectedVersionId}/restore`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          visualEditor.innerHTML = data.content;
+          document.getElementById('guideTitle').value = data.title;
+          history.snapshot();
+          closeVersionPanel();
+          showToast('Version restored');
+          updateWordCount();
+        }
+      } catch (err) {
+        showToast('Error restoring version');
+      }
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ===========================
+    //  PHASE 4: DUPLICATE / CLONE GUIDE
+    // ===========================
+    document.getElementById('duplicateBtn').addEventListener('click', async () => {
+      if (!confirm('Create a copy of this guide?')) return;
+      try {
+        const res = await fetch(`/admin/guide/${currentSlug}/duplicate`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Guide duplicated');
+          window.open(`/admin/guide/${data.slug}`, '_blank');
+        } else {
+          showToast(data.error || 'Error duplicating guide');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      }
+    });
+
+    // ===========================
+    //  PHASE 4: GUIDE TEMPLATES
+    // ===========================
+    const GUIDE_TEMPLATES = [
+      {
+        name: 'Getting Started Guide',
+        desc: 'Welcome, prerequisites, steps',
+        icon: '\uD83D\uDE80',
+        content: `<h1>Getting Started</h1>
+<p>Welcome to <strong>[Product Name]</strong>! This guide will help you get up and running quickly.</p>
+<div class="callout tip"><span class="callout-icon">\u2705</span><div><strong>Tip:</strong> Follow these steps in order for the best experience.</div></div>
+<h2>Prerequisites</h2>
+<ul><li>Requirement 1</li><li>Requirement 2</li><li>Requirement 3</li></ul>
+<h2>Installation</h2>
+<ol><li>Step one — download the software</li><li>Step two — run the installer</li><li>Step three — verify the installation</li></ol>
+<div class="code-block-wrapper" contenteditable="false"><div class="code-block-header"><span class="code-lang-label">bash</span><button class="code-copy-btn" onclick="copyCodeBlock(this)">Copy</button></div><pre><code class="language-bash" contenteditable="true"># Verify installation\nyour-command --version</code></pre></div>
+<h2>Basic Usage</h2>
+<p>Describe the basic workflow here. Include screenshots or examples as needed.</p>
+<h2>Next Steps</h2>
+<ul><li><a href="#">Advanced Configuration</a></li><li><a href="#">API Documentation</a></li><li><a href="#">Troubleshooting</a></li></ul>
+<div class="callout info"><span class="callout-icon">\u2139\uFE0F</span><div><strong>Info:</strong> Need help? Contact our support team.</div></div>`
+      },
+      {
+        name: 'API Documentation',
+        desc: 'Endpoints, auth, examples',
+        icon: '\uD83D\uDD17',
+        content: `<h1>API Documentation</h1>
+<p>Complete API reference for <strong>[Service Name]</strong>.</p>
+<h2>Authentication</h2>
+<p>All API requests require an API key sent in the <code>Authorization</code> header:</p>
+<div class="code-block-wrapper" contenteditable="false"><div class="code-block-header"><span class="code-lang-label">bash</span><button class="code-copy-btn" onclick="copyCodeBlock(this)">Copy</button></div><pre><code class="language-bash" contenteditable="true">Authorization: Bearer YOUR_API_KEY</code></pre></div>
+<h2>Base URL</h2>
+<p><code>https://api.example.com/v1</code></p>
+<h2>Endpoints</h2>
+<table><thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead><tbody>
+<tr><td><span class="status green">GET</span></td><td><code>/users</code></td><td>List all users</td></tr>
+<tr><td><span class="status blue">POST</span></td><td><code>/users</code></td><td>Create a user</td></tr>
+<tr><td><span class="status amber">PUT</span></td><td><code>/users/:id</code></td><td>Update a user</td></tr>
+<tr><td><span class="status red">DELETE</span></td><td><code>/users/:id</code></td><td>Delete a user</td></tr>
+</tbody></table>
+<h2>Example Request</h2>
+<div class="code-block-wrapper" contenteditable="false"><div class="code-block-header"><span class="code-lang-label">javascript</span><button class="code-copy-btn" onclick="copyCodeBlock(this)">Copy</button></div><pre><code class="language-javascript" contenteditable="true">const response = await fetch('https://api.example.com/v1/users', {\n  method: 'GET',\n  headers: { 'Authorization': 'Bearer YOUR_API_KEY' }\n});\nconst data = await response.json();</code></pre></div>
+<h2>Error Codes</h2>
+<table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>400</code></td><td>Bad Request — invalid parameters</td></tr>
+<tr><td><code>401</code></td><td>Unauthorized — invalid API key</td></tr>
+<tr><td><code>404</code></td><td>Not Found — resource doesn\\'t exist</td></tr>
+<tr><td><code>500</code></td><td>Server Error — try again later</td></tr>
+</tbody></table>
+<div class="callout warn"><span class="callout-icon">\u26A0\uFE0F</span><div><strong>Warning:</strong> Rate limit is 100 requests per minute per API key.</div></div>`
+      },
+      {
+        name: 'FAQ',
+        desc: 'Questions with expand/collapse',
+        icon: '\u2753',
+        content: `<h1>Frequently Asked Questions</h1>
+<p>Find answers to common questions below. Click on a question to expand the answer.</p>
+<h2>General</h2>
+<details class="expand-block"><summary class="expand-header">\u25B6 What is [Product Name]?</summary><div class="expand-content"><p>[Product Name] is a tool that helps you accomplish [description]. It provides [key benefits].</p></div></details>
+<details class="expand-block"><summary class="expand-header">\u25B6 How do I get started?</summary><div class="expand-content"><p>Check out our <a href="#">Getting Started Guide</a> for step-by-step instructions.</p></div></details>
+<details class="expand-block"><summary class="expand-header">\u25B6 Is there a free trial?</summary><div class="expand-content"><p>Yes! You can sign up for a 14-day free trial with no credit card required.</p></div></details>
+<h2>Technical</h2>
+<details class="expand-block"><summary class="expand-header">\u25B6 What browsers are supported?</summary><div class="expand-content"><p>We support the latest versions of Chrome, Firefox, Safari, and Edge.</p></div></details>
+<details class="expand-block"><summary class="expand-header">\u25B6 Can I use the API to integrate?</summary><div class="expand-content"><p>Yes, see our <a href="#">API Documentation</a> for full details on available endpoints.</p></div></details>
+<details class="expand-block"><summary class="expand-header">\u25B6 How do I reset my password?</summary><div class="expand-content"><p>Go to the login page and click "Forgot Password". Follow the email instructions to reset.</p></div></details>
+<h2>Billing</h2>
+<details class="expand-block"><summary class="expand-header">\u25B6 What payment methods do you accept?</summary><div class="expand-content"><p>We accept all major credit cards, PayPal, and bank transfer for annual plans.</p></div></details>
+<div class="callout info"><span class="callout-icon">\u2139\uFE0F</span><div><strong>Info:</strong> Can\\'t find your answer? <a href="#">Contact support</a> and we\\'ll help you out.</div></div>`
+      },
+      {
+        name: 'Troubleshooting',
+        desc: 'Common issues and solutions',
+        icon: '\uD83D\uDD27',
+        content: `<h1>Troubleshooting Guide</h1>
+<p>Use this guide to diagnose and resolve common issues.</p>
+<h2>Quick Diagnostics</h2>
+<ul class="task-list" contenteditable="false">
+<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Check your internet connection</span></li>
+<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Verify you\\'re using a supported browser</span></li>
+<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Clear browser cache and cookies</span></li>
+<li class="task-item"><input type="checkbox" onchange="toggleTaskItem(this)"><span class="task-text" contenteditable="true">Try logging out and back in</span></li>
+</ul>
+<h2>Common Issues</h2>
+<h3>Issue: Cannot log in</h3>
+<div class="callout warn"><span class="callout-icon">\u26A0\uFE0F</span><div><strong>Symptoms:</strong> Login page shows "Invalid credentials" error.</div></div>
+<p><strong>Solution:</strong></p>
+<ol><li>Verify your username and password are correct</li><li>Check if Caps Lock is on</li><li>Try resetting your password</li><li>Contact admin if the issue persists</li></ol>
+<h3>Issue: Page loads slowly</h3>
+<p><strong>Possible causes:</strong></p>
+<ul><li>Slow network connection</li><li>Browser extensions interfering</li><li>Large cache or cookies</li></ul>
+<p><strong>Solution:</strong> Clear cache, disable extensions, or try a different browser.</p>
+<h2>Error Reference</h2>
+<table><thead><tr><th>Error Code</th><th>Description</th><th>Resolution</th></tr></thead><tbody>
+<tr><td><span class="status red">ERR-001</span></td><td>Connection timeout</td><td>Check network and retry</td></tr>
+<tr><td><span class="status red">ERR-002</span></td><td>Authentication failed</td><td>Re-enter credentials</td></tr>
+<tr><td><span class="status amber">ERR-003</span></td><td>Feature unavailable</td><td>Update to latest version</td></tr>
+</tbody></table>
+<h2>Still Need Help?</h2>
+<div class="callout tip"><span class="callout-icon">\u2705</span><div><strong>Tip:</strong> Contact our support team at <a href="#">support@example.com</a> with your error details and screenshots.</div></div>`
+      },
+      {
+        name: 'Release Notes',
+        desc: 'Versions, features, fixes',
+        icon: '\uD83D\uDCE6',
+        content: `<h1>Release Notes</h1>
+<p>Track what\\'s new, improved, and fixed in each release.</p>
+<h2>v2.1.0 <span class="status green">Latest</span></h2>
+<p><em>Released: ${new Date().toLocaleDateString()}</em></p>
+<h3>New Features</h3>
+<ul><li><strong>Feature A</strong> — Description of the new feature</li><li><strong>Feature B</strong> — Description of another feature</li></ul>
+<h3>Improvements</h3>
+<ul><li>Improved performance of [component]</li><li>Updated UI for [section]</li></ul>
+<h3>Bug Fixes</h3>
+<ul><li>Fixed issue where [bug description]</li><li>Resolved crash when [scenario]</li></ul>
+<hr>
+<h2>v2.0.0</h2>
+<p><em>Released: January 2026</em></p>
+<h3>Breaking Changes</h3>
+<div class="callout warn"><span class="callout-icon">\u26A0\uFE0F</span><div><strong>Warning:</strong> This release contains breaking changes. Please review before upgrading.</div></div>
+<ul><li>API endpoint <code>/v1/old</code> has been removed. Use <code>/v2/new</code> instead.</li><li>Minimum Node.js version is now 18</li></ul>
+<h3>New Features</h3>
+<ul><li>Major redesign of the dashboard</li><li>Added dark mode support</li></ul>
+<hr>
+<h2>v1.0.0</h2>
+<p><em>Released: December 2025</em></p>
+<p><span class="status blue">Initial Release</span></p>
+<ul><li>Core functionality launched</li><li>Basic API with CRUD operations</li><li>User authentication and authorization</li></ul>`
+      },
+      {
+        name: 'Blank',
+        desc: 'Start from scratch',
+        icon: '\uD83D\uDCC4',
+        content: '<p><br></p>'
+      }
+    ];
+
+    // Populate template grid
+    const templateGrid = document.getElementById('templateGrid');
+    GUIDE_TEMPLATES.forEach((tmpl, idx) => {
+      const card = document.createElement('button');
+      card.className = 'template-card';
+      card.innerHTML = `<div class="template-card-icon">${tmpl.icon}</div><div class="template-card-name">${tmpl.name}</div><div class="template-card-desc">${tmpl.desc}</div>`;
+      card.addEventListener('click', () => {
+        applyTemplate(idx);
+      });
+      templateGrid.appendChild(card);
+    });
+
+    document.getElementById('insertTemplate').addEventListener('click', () => {
+      document.getElementById('templateModal').classList.add('visible');
+    });
+    document.getElementById('templateCancel').addEventListener('click', () => {
+      document.getElementById('templateModal').classList.remove('visible');
+    });
+
+    function applyTemplate(idx) {
+      const tmpl = GUIDE_TEMPLATES[idx];
+      const editorText = visualEditor.textContent.trim();
+      if (editorText && tmpl.name !== 'Blank') {
+        if (!confirm('Replace current content with the "' + tmpl.name + '" template?')) return;
+      }
+      snapshotBeforeAction();
+      visualEditor.innerHTML = tmpl.content;
+      document.getElementById('templateModal').classList.remove('visible');
+      showToast('Template applied: ' + tmpl.name);
+      snapshotAfterAction();
+      updateWordCount();
+    }
+
+    // ===========================
+    //  PHASE 4: ADD TO SLASH COMMANDS
+    // ===========================
+    SLASH_COMMANDS.push(
+      { cat: 'Actions', name: 'Template', desc: 'Load a guide template', icon: '\uD83D\uDCD1', action: () => document.getElementById('insertTemplate').click() },
+      { cat: 'Actions', name: 'Duplicate Guide', desc: 'Clone this guide', icon: '\uD83D\uDCCB', action: () => document.getElementById('duplicateBtn').click() },
+      { cat: 'Actions', name: 'Version History', desc: 'Browse past versions', icon: '\uD83D\uDD53', action: () => document.getElementById('historyBtn').click() },
     );
   </script>
 </body>

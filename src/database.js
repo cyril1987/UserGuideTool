@@ -30,6 +30,15 @@ function initialize() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS guide_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guide_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (guide_id) REFERENCES guides(id) ON DELETE CASCADE
+    );
   `);
 
   // Set default admin password if not exists (default: "admin123")
@@ -108,6 +117,27 @@ function searchGuidesMulti(patterns) {
   ).all(...params);
 }
 
+// --- Version history ---
+
+function saveVersion(guideId, title, content) {
+  getDb().prepare('INSERT INTO guide_versions (guide_id, title, content) VALUES (?, ?, ?)').run(guideId, title, content);
+  // Keep only the last 50 versions per guide
+  getDb().prepare(`
+    DELETE FROM guide_versions
+    WHERE guide_id = ? AND id NOT IN (
+      SELECT id FROM guide_versions WHERE guide_id = ? ORDER BY created_at DESC LIMIT 50
+    )
+  `).run(guideId, guideId);
+}
+
+function getVersions(guideId) {
+  return getDb().prepare('SELECT id, title, created_at FROM guide_versions WHERE guide_id = ? ORDER BY created_at DESC').all(guideId);
+}
+
+function getVersion(versionId) {
+  return getDb().prepare('SELECT * FROM guide_versions WHERE id = ?').get(versionId);
+}
+
 module.exports = {
   getDb,
   getAllGuides,
@@ -120,4 +150,7 @@ module.exports = {
   changePassword,
   searchGuides,
   searchGuidesMulti,
+  saveVersion,
+  getVersions,
+  getVersion,
 };

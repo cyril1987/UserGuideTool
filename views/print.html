@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} — Print</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    body {
+      background: white;
+      padding: 0;
+      margin: 0;
+    }
+    .print-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .print-header {
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+    }
+    .print-header h1 {
+      font-size: 28px;
+      color: #111827;
+      margin: 0;
+    }
+    .print-meta {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+    .print-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 12px 0;
+    }
+    .print-actions button {
+      padding: 8px 20px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #374151;
+      transition: all 0.15s;
+    }
+    .print-actions button:hover { background: #f3f4f6; }
+    .print-actions button.primary {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    .print-actions button.primary:hover { background: #1d4ed8; }
+
+    @media print {
+      .print-actions { display: none; }
+      .print-container { padding: 0; max-width: none; }
+      .print-header { border-bottom: 1px solid #ccc; }
+      body { font-size: 12pt; }
+      .guide-content img { max-width: 100%; }
+      .guide-content .code-block-wrapper { break-inside: avoid; }
+      .guide-content table { break-inside: avoid; }
+      .guide-content .callout { break-inside: avoid; }
+      .guide-content .card { break-inside: avoid; }
+      .guide-content details { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-container">
+    <div class="print-actions">
+      <button class="primary" onclick="window.print()">&#x1F5A8; Print / Save as PDF</button>
+      <button onclick="window.close()">Close</button>
+      <button onclick="window.location.href='/guide/{{slug}}'">Back to Guide</button>
+    </div>
+    <div class="print-header">
+      <h1>{{title}}</h1>
+      <div class="print-meta">Printed on <script>document.write(new Date().toLocaleDateString())</script></div>
+    </div>
+    <div class="guide-content">
+      {{content}}
+    </div>
+  </div>
+  <script>
+    // Syntax highlighting
+    document.querySelectorAll('.code-block-wrapper code').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  </script>
+</body>
+</html>
