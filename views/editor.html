@@ -568,10 +568,10 @@
         </button>
       </div>
       <div class="fmt-group">
-        <button class="fmt-btn" data-cmd="undo" title="Undo (Ctrl+Z)">
+        <button class="fmt-btn" id="btnUndo" title="Undo (Ctrl+Z)">
           <svg viewBox="0 0 24 24"><path d="M3 10h10a5 5 0 015 5v2M3 10l5-5M3 10l5 5"/></svg>
         </button>
-        <button class="fmt-btn" data-cmd="redo" title="Redo (Ctrl+Y)">
+        <button class="fmt-btn" id="btnRedo" title="Redo (Ctrl+Y)">
           <svg viewBox="0 0 24 24"><path d="M21 10H11a5 5 0 00-5 5v2M21 10l-5-5M21 10l-5 5"/></svg>
         </button>
       </div>
@@ -725,11 +725,125 @@
     }
 
     // ===========================
+    //  UNDO / REDO HISTORY
+    // ===========================
+    const history = {
+      stack: [],
+      index: -1,
+      maxSize: 200,
+      paused: false,
+      timer: null,
+
+      // Initialize with current state
+      init() {
+        this.stack = [visualEditor.innerHTML];
+        this.index = 0;
+        this.updateButtons();
+      },
+
+      // Take a snapshot of the current editor state
+      snapshot() {
+        if (this.paused) return;
+        const html = visualEditor.innerHTML;
+        // Don't push if identical to current state
+        if (this.index >= 0 && this.stack[this.index] === html) return;
+        // Truncate any redo states beyond current index
+        this.stack = this.stack.slice(0, this.index + 1);
+        this.stack.push(html);
+        // Cap the stack size
+        if (this.stack.length > this.maxSize) {
+          this.stack.shift();
+        }
+        this.index = this.stack.length - 1;
+        this.updateButtons();
+      },
+
+      // Debounced snapshot for typing (captures after 500ms of idle)
+      debouncedSnapshot() {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.snapshot(), 500);
+      },
+
+      undo() {
+        if (this.index <= 0) return;
+        // Save current state if not already saved
+        const current = visualEditor.innerHTML;
+        if (this.stack[this.index] !== current) {
+          this.stack[this.index] = current;
+        }
+        this.index--;
+        this.paused = true;
+        visualEditor.innerHTML = this.stack[this.index];
+        this.paused = false;
+        this.updateButtons();
+        setTimeout(checkTableContext, 10);
+      },
+
+      redo() {
+        if (this.index >= this.stack.length - 1) return;
+        this.index++;
+        this.paused = true;
+        visualEditor.innerHTML = this.stack[this.index];
+        this.paused = false;
+        this.updateButtons();
+        setTimeout(checkTableContext, 10);
+      },
+
+      updateButtons() {
+        const undoBtn = document.getElementById('btnUndo');
+        const redoBtn = document.getElementById('btnRedo');
+        undoBtn.style.opacity = this.index > 0 ? '1' : '0.3';
+        undoBtn.style.pointerEvents = this.index > 0 ? 'auto' : 'none';
+        redoBtn.style.opacity = this.index < this.stack.length - 1 ? '1' : '0.3';
+        redoBtn.style.pointerEvents = this.index < this.stack.length - 1 ? 'auto' : 'none';
+      }
+    };
+
+    history.init();
+
+    // Toolbar buttons
+    document.getElementById('btnUndo').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      history.undo();
+    });
+    document.getElementById('btnRedo').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      history.redo();
+    });
+
+    // Track typing changes via input event
+    visualEditor.addEventListener('input', () => {
+      history.debouncedSnapshot();
+    });
+
+    // Keyboard shortcuts for undo/redo (override browser default)
+    visualEditor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        history.undo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        history.redo();
+      }
+    });
+
+    // Helper: take snapshot before a deliberate action (used by toolbar ops)
+    function snapshotBeforeAction() {
+      history.snapshot();
+    }
+    function snapshotAfterAction() {
+      // Small delay to let DOM settle
+      setTimeout(() => history.snapshot(), 20);
+    }
+
+    // ===========================
     //  FORMAT TOOLBAR
     // ===========================
     document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        snapshotBeforeAction();
         const cmd = btn.dataset.cmd;
         if (cmd === 'createLink') {
           const url = prompt('Enter URL:');
@@ -738,17 +852,22 @@
           document.execCommand(cmd, false, null);
         }
         updateToolbarState();
+        snapshotAfterAction();
       });
     });
 
     document.getElementById('btnUnlink').addEventListener('mousedown', (e) => {
       e.preventDefault();
+      snapshotBeforeAction();
       document.execCommand('unlink', false, null);
+      snapshotAfterAction();
     });
 
     document.getElementById('blockType').addEventListener('change', (e) => {
+      snapshotBeforeAction();
       document.execCommand('formatBlock', false, '<' + e.target.value + '>');
       visualEditor.focus();
+      snapshotAfterAction();
     });
 
     function updateToolbarState() {
@@ -821,6 +940,7 @@
     //  INSERT BLOCKS
     // ===========================
     function insertCallout(type, icon, label) {
+      snapshotBeforeAction();
       insertAtCursor(`
         <div class="callout ${type}">
           <span class="callout-icon">${icon}</span>
@@ -828,6 +948,7 @@
         </div><p><br></p>
       `);
       showToast(`${label} callout inserted`);
+      snapshotAfterAction();
     }
 
     document.getElementById('insertTip').addEventListener('click', () => insertCallout('tip', '&#x2705;', 'Tip'));
@@ -836,8 +957,10 @@
     document.getElementById('insertInfo').addEventListener('click', () => insertCallout('info', '&#x2139;&#xFE0F;', 'Info'));
 
     document.getElementById('insertCard').addEventListener('click', () => {
+      snapshotBeforeAction();
       insertAtCursor(`<div class="card"><p>Type your card content here...</p></div><p><br></p>`);
       showToast('Card inserted');
+      snapshotAfterAction();
     });
 
     document.getElementById('insertTable').addEventListener('click', () => {
@@ -847,6 +970,7 @@
       document.getElementById('tableModal').classList.remove('visible');
     });
     document.getElementById('tableInsert').addEventListener('click', () => {
+      snapshotBeforeAction();
       const rows = parseInt(document.getElementById('tableRows').value) || 3;
       const cols = parseInt(document.getElementById('tableCols').value) || 3;
       let html = '<table class="compare-table"><thead><tr>';
@@ -861,9 +985,14 @@
       insertAtCursor(html);
       document.getElementById('tableModal').classList.remove('visible');
       showToast('Table inserted');
+      snapshotAfterAction();
     });
 
-    document.getElementById('insertHR').addEventListener('click', () => insertAtCursor('<hr><p><br></p>'));
+    document.getElementById('insertHR').addEventListener('click', () => {
+      snapshotBeforeAction();
+      insertAtCursor('<hr><p><br></p>');
+      snapshotAfterAction();
+    });
 
     // Image upload
     document.getElementById('insertImage').addEventListener('click', () => document.getElementById('imageInput').click());
@@ -881,8 +1010,10 @@
         const res = await fetch('/admin/upload', { method: 'POST', body: formData });
         const data = await res.json();
         if (data.url) {
+          snapshotBeforeAction();
           insertAtCursor(`<img src="${data.url}" alt="Uploaded image" style="max-width:100%; border-radius:8px;" loading="lazy"><p><br></p>`);
           showToast('Image uploaded');
+          snapshotAfterAction();
         } else {
           showToast('Upload failed: ' + (data.error || 'Unknown error'));
         }
@@ -966,6 +1097,7 @@
       handle.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        snapshotBeforeAction();
         const startX = e.clientX;
         const startY = e.clientY;
         const startW = el.offsetWidth;
@@ -1000,6 +1132,7 @@
     document.addEventListener('mouseup', () => {
       if (resizeState) {
         resizeState = null;
+        snapshotAfterAction();
       }
     });
 
@@ -1106,6 +1239,7 @@
     // --- Row operations ---
     function insertRow(position) {
       if (!activeCell || !activeTable) return;
+      snapshotBeforeAction();
       const row = activeCell.parentElement;
       const cols = getColCount(activeTable);
       const isInHead = activeCell.tagName === 'TH' || (row.parentElement && row.parentElement.tagName === 'THEAD');
@@ -1124,10 +1258,12 @@
       const first = newRow.querySelector('td, th');
       if (first) { placeCursorIn(first); }
       showToast('Row inserted');
+      snapshotAfterAction();
     }
 
     function deleteRow() {
       if (!activeCell || !activeTable) return;
+      snapshotBeforeAction();
       const row = activeCell.parentElement;
       const rows = activeTable.querySelectorAll('tr');
       if (rows.length <= 1) {
@@ -1142,6 +1278,7 @@
         if (cell) placeCursorIn(cell);
       }
       showToast('Row deleted');
+      snapshotAfterAction();
       setTimeout(checkTableContext, 10);
     }
 
@@ -1152,6 +1289,7 @@
     // --- Column operations ---
     function insertColumn(position) {
       if (!activeCell || !activeTable) return;
+      snapshotBeforeAction();
       const colIdx = getCellIndex(activeCell);
       const rows = activeTable.querySelectorAll('tr');
       rows.forEach(row => {
@@ -1172,10 +1310,12 @@
         }
       });
       showToast('Column inserted');
+      snapshotAfterAction();
     }
 
     function deleteColumn() {
       if (!activeCell || !activeTable) return;
+      snapshotBeforeAction();
       const colIdx = getCellIndex(activeCell);
       const cols = getColCount(activeTable);
       if (cols <= 1) {
@@ -1194,6 +1334,7 @@
         }
       });
       showToast('Column deleted');
+      snapshotAfterAction();
       // Refocus
       const ctx = getTableContext();
       if (!ctx) {
@@ -1210,6 +1351,7 @@
     // --- Toggle header row ---
     document.getElementById('ttToggleHeader').addEventListener('click', () => {
       if (!activeTable) return;
+      snapshotBeforeAction();
       const existingThead = activeTable.querySelector('thead');
       if (existingThead) {
         // Convert thead to tbody rows
@@ -1230,6 +1372,7 @@
         }
         existingThead.remove();
         showToast('Header removed');
+        snapshotAfterAction();
       } else {
         // Convert first row to header
         const firstRow = activeTable.querySelector('tr');
@@ -1248,12 +1391,14 @@
         thead.appendChild(firstRow);
         activeTable.insertBefore(thead, activeTable.firstChild);
         showToast('Header added');
+        snapshotAfterAction();
       }
     });
 
     // --- Merge cells (simple: toggle colspan on active cell) ---
     document.getElementById('ttMerge').addEventListener('click', () => {
       if (!activeCell) return;
+      snapshotBeforeAction();
       const currentSpan = activeCell.colSpan || 1;
       if (currentSpan > 1) {
         // Split back
@@ -1265,6 +1410,7 @@
           row.insertBefore(newCell, activeCell.nextSibling);
         }
         showToast('Cells split');
+        snapshotAfterAction();
       } else {
         // Merge with next cell
         const next = activeCell.nextElementSibling;
@@ -1277,6 +1423,7 @@
           }
           next.remove();
           showToast('Cells merged');
+          snapshotAfterAction();
         } else {
           showToast('No adjacent cell to merge with');
         }
@@ -1286,6 +1433,7 @@
     // --- Delete entire table ---
     document.getElementById('ttDeleteTable').addEventListener('click', () => {
       if (!activeTable) return;
+      snapshotBeforeAction();
       const p = document.createElement('p');
       p.innerHTML = '<br>';
       activeTable.replaceWith(p);
@@ -1295,6 +1443,7 @@
       tableToolbar.classList.remove('visible');
       highlightCell(null);
       showToast('Table deleted');
+      snapshotAfterAction();
     });
 
     // --- Tab navigation between cells ---
@@ -1368,13 +1517,14 @@
         const rect = target.getBoundingClientRect();
         if (e.clientX > rect.right - 4) {
           e.preventDefault();
+          snapshotBeforeAction();
           colResizeState = { th: target, startX: e.clientX, startW: target.offsetWidth };
         }
       }
     });
 
     document.addEventListener('mouseup', () => {
-      if (colResizeState) { colResizeState = null; }
+      if (colResizeState) { colResizeState = null; snapshotAfterAction(); }
     });
 
     // Helper: place cursor in a cell
