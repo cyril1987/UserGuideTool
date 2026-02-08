@@ -382,6 +382,102 @@
       stroke-linejoin: round;
     }
 
+    /* ===========================
+       TABLE EDITING TOOLBAR
+       =========================== */
+    #tableToolbar {
+      position: fixed;
+      z-index: 1500;
+      display: none;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      padding: 6px 8px;
+      gap: 3px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #tableToolbar.visible {
+      display: flex;
+    }
+    .tt-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--gray-200);
+      margin: 0 4px;
+    }
+    .tt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: none;
+      background: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: var(--gray-600);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 8px;
+      white-space: nowrap;
+      transition: all 0.1s;
+    }
+    .tt-btn:hover {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+    .tt-btn.danger:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .tt-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tt-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0 4px;
+    }
+
+    /* Active cell/row highlight in editor */
+    #visual-editor td.cell-active,
+    #visual-editor th.cell-active {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+      background: rgba(37, 99, 235, 0.04) !important;
+    }
+    #visual-editor tr.row-active td,
+    #visual-editor tr.row-active th {
+      background: rgba(37, 99, 235, 0.03);
+    }
+
+    /* Column resize handles on table headers */
+    #visual-editor th, #visual-editor td {
+      position: relative;
+    }
+    #visual-editor .col-resize-handle {
+      position: absolute;
+      top: 0;
+      right: -2px;
+      width: 4px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
+    #visual-editor .col-resize-handle:hover {
+      background: var(--primary);
+      opacity: 0.4;
+    }
+
     /* HTML Source editor */
     #source-editor {
       display: none;
@@ -505,6 +601,51 @@
 
     <!-- HTML Source Editor -->
     <textarea id="source-editor" spellcheck="false"></textarea>
+  </div>
+
+  <!-- Table Editing Toolbar (floating) -->
+  <div id="tableToolbar">
+    <span class="tt-label">Row</span>
+    <button class="tt-btn" id="ttRowAbove" title="Insert row above">
+      <svg viewBox="0 0 24 24"><path d="M12 19V5"/><polyline points="5 12 12 5 19 12"/></svg>
+      Above
+    </button>
+    <button class="tt-btn" id="ttRowBelow" title="Insert row below">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14"/><polyline points="19 12 12 19 5 12"/></svg>
+      Below
+    </button>
+    <button class="tt-btn danger" id="ttRowDelete" title="Delete row">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Delete
+    </button>
+    <div class="tt-sep"></div>
+    <span class="tt-label">Col</span>
+    <button class="tt-btn" id="ttColLeft" title="Insert column left">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 5 5 12 12 19"/></svg>
+      Left
+    </button>
+    <button class="tt-btn" id="ttColRight" title="Insert column right">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14"/><polyline points="12 19 19 12 12 5"/></svg>
+      Right
+    </button>
+    <button class="tt-btn danger" id="ttColDelete" title="Delete column">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Delete
+    </button>
+    <div class="tt-sep"></div>
+    <button class="tt-btn" id="ttToggleHeader" title="Toggle header row">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      Header
+    </button>
+    <button class="tt-btn" id="ttMerge" title="Merge/unmerge selected cells">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      Merge
+    </button>
+    <div class="tt-sep"></div>
+    <button class="tt-btn danger" id="ttDeleteTable" title="Delete entire table">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      Table
+    </button>
   </div>
 
   <!-- Emoji Picker -->
@@ -863,6 +1004,391 @@
     });
 
     // ===========================
+    //  TABLE EDITING
+    // ===========================
+    const tableToolbar = document.getElementById('tableToolbar');
+    let activeTable = null;
+    let activeCell = null;
+
+    // Find the table/cell the cursor is currently in
+    function getTableContext() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return null;
+      let node = sel.anchorNode;
+      let td = null, tr = null, table = null;
+      while (node && node !== visualEditor) {
+        if (node.nodeType === 1) {
+          if (!td && (node.tagName === 'TD' || node.tagName === 'TH')) td = node;
+          if (!tr && node.tagName === 'TR') tr = node;
+          if (!table && node.tagName === 'TABLE') table = node;
+        }
+        node = node.parentElement;
+      }
+      if (!table) return null;
+      return { table, tr, td };
+    }
+
+    // Get cell index considering colspans
+    function getCellIndex(cell) {
+      let idx = 0;
+      let sib = cell.previousElementSibling;
+      while (sib) {
+        idx += sib.colSpan || 1;
+        sib = sib.previousElementSibling;
+      }
+      return idx;
+    }
+
+    // Get total column count for a table
+    function getColCount(table) {
+      const firstRow = table.querySelector('tr');
+      if (!firstRow) return 0;
+      let count = 0;
+      for (const cell of firstRow.children) count += cell.colSpan || 1;
+      return count;
+    }
+
+    // Position the table toolbar above the active table
+    function positionTableToolbar() {
+      if (!activeTable) { tableToolbar.classList.remove('visible'); return; }
+      const rect = activeTable.getBoundingClientRect();
+      const tbW = tableToolbar.offsetWidth || 500;
+      let left = rect.left + (rect.width - tbW) / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tbW - 8));
+      let top = rect.top - 44;
+      if (top < 8) top = rect.bottom + 6;
+      tableToolbar.style.left = left + 'px';
+      tableToolbar.style.top = top + 'px';
+      tableToolbar.classList.add('visible');
+    }
+
+    // Highlight active cell/row
+    function highlightCell(cell) {
+      // Clear previous
+      visualEditor.querySelectorAll('.cell-active').forEach(c => c.classList.remove('cell-active'));
+      visualEditor.querySelectorAll('.row-active').forEach(r => r.classList.remove('row-active'));
+      if (cell) {
+        cell.classList.add('cell-active');
+        if (cell.parentElement) cell.parentElement.classList.add('row-active');
+      }
+    }
+
+    // Monitor cursor position for table context
+    function checkTableContext() {
+      const ctx = getTableContext();
+      if (ctx) {
+        activeTable = ctx.table;
+        activeCell = ctx.td;
+        highlightCell(activeCell);
+        positionTableToolbar();
+      } else {
+        if (activeTable) {
+          highlightCell(null);
+          activeTable = null;
+          activeCell = null;
+          tableToolbar.classList.remove('visible');
+        }
+      }
+    }
+
+    visualEditor.addEventListener('click', () => setTimeout(checkTableContext, 10));
+    visualEditor.addEventListener('keyup', (e) => {
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab','Enter'].includes(e.key)) {
+        setTimeout(checkTableContext, 10);
+      }
+    });
+
+    // Scroll/resize: reposition toolbar
+    document.getElementById('visual-editor').addEventListener('scroll', () => {
+      if (activeTable) positionTableToolbar();
+    });
+
+    // --- Row operations ---
+    function insertRow(position) {
+      if (!activeCell || !activeTable) return;
+      const row = activeCell.parentElement;
+      const cols = getColCount(activeTable);
+      const isInHead = activeCell.tagName === 'TH' || (row.parentElement && row.parentElement.tagName === 'THEAD');
+      const newRow = document.createElement('tr');
+      for (let i = 0; i < cols; i++) {
+        const cell = document.createElement(isInHead ? 'th' : 'td');
+        cell.innerHTML = '&nbsp;';
+        newRow.appendChild(cell);
+      }
+      if (position === 'above') {
+        row.parentElement.insertBefore(newRow, row);
+      } else {
+        row.parentElement.insertBefore(newRow, row.nextSibling);
+      }
+      // Focus first cell of new row
+      const first = newRow.querySelector('td, th');
+      if (first) { placeCursorIn(first); }
+      showToast('Row inserted');
+    }
+
+    function deleteRow() {
+      if (!activeCell || !activeTable) return;
+      const row = activeCell.parentElement;
+      const rows = activeTable.querySelectorAll('tr');
+      if (rows.length <= 1) {
+        showToast('Cannot delete the only row');
+        return;
+      }
+      // Move focus to adjacent row
+      const nextRow = row.nextElementSibling || row.previousElementSibling;
+      row.remove();
+      if (nextRow) {
+        const cell = nextRow.querySelector('td, th');
+        if (cell) placeCursorIn(cell);
+      }
+      showToast('Row deleted');
+      setTimeout(checkTableContext, 10);
+    }
+
+    document.getElementById('ttRowAbove').addEventListener('click', () => insertRow('above'));
+    document.getElementById('ttRowBelow').addEventListener('click', () => insertRow('below'));
+    document.getElementById('ttRowDelete').addEventListener('click', deleteRow);
+
+    // --- Column operations ---
+    function insertColumn(position) {
+      if (!activeCell || !activeTable) return;
+      const colIdx = getCellIndex(activeCell);
+      const rows = activeTable.querySelectorAll('tr');
+      rows.forEach(row => {
+        let currentIdx = 0;
+        let refCell = null;
+        for (const cell of row.children) {
+          if (currentIdx === colIdx) { refCell = cell; break; }
+          currentIdx += cell.colSpan || 1;
+          if (currentIdx > colIdx) { refCell = cell; break; }
+        }
+        const isHeader = row.parentElement && row.parentElement.tagName === 'THEAD';
+        const newCell = document.createElement(isHeader ? 'th' : 'td');
+        newCell.innerHTML = '&nbsp;';
+        if (position === 'left') {
+          row.insertBefore(newCell, refCell);
+        } else {
+          row.insertBefore(newCell, refCell ? refCell.nextSibling : null);
+        }
+      });
+      showToast('Column inserted');
+    }
+
+    function deleteColumn() {
+      if (!activeCell || !activeTable) return;
+      const colIdx = getCellIndex(activeCell);
+      const cols = getColCount(activeTable);
+      if (cols <= 1) {
+        showToast('Cannot delete the only column');
+        return;
+      }
+      const rows = activeTable.querySelectorAll('tr');
+      rows.forEach(row => {
+        let currentIdx = 0;
+        for (const cell of Array.from(row.children)) {
+          if (currentIdx === colIdx) {
+            cell.remove();
+            break;
+          }
+          currentIdx += cell.colSpan || 1;
+        }
+      });
+      showToast('Column deleted');
+      // Refocus
+      const ctx = getTableContext();
+      if (!ctx) {
+        const firstCell = activeTable.querySelector('td, th');
+        if (firstCell) placeCursorIn(firstCell);
+      }
+      setTimeout(checkTableContext, 10);
+    }
+
+    document.getElementById('ttColLeft').addEventListener('click', () => insertColumn('left'));
+    document.getElementById('ttColRight').addEventListener('click', () => insertColumn('right'));
+    document.getElementById('ttColDelete').addEventListener('click', deleteColumn);
+
+    // --- Toggle header row ---
+    document.getElementById('ttToggleHeader').addEventListener('click', () => {
+      if (!activeTable) return;
+      const existingThead = activeTable.querySelector('thead');
+      if (existingThead) {
+        // Convert thead to tbody rows
+        const tbody = activeTable.querySelector('tbody') || activeTable;
+        while (existingThead.firstChild) {
+          const row = existingThead.firstChild;
+          // Convert th to td
+          for (const cell of Array.from(row.children)) {
+            if (cell.tagName === 'TH') {
+              const td = document.createElement('td');
+              td.innerHTML = cell.innerHTML;
+              td.colSpan = cell.colSpan;
+              td.rowSpan = cell.rowSpan;
+              cell.replaceWith(td);
+            }
+          }
+          tbody.insertBefore(row, tbody.firstChild);
+        }
+        existingThead.remove();
+        showToast('Header removed');
+      } else {
+        // Convert first row to header
+        const firstRow = activeTable.querySelector('tr');
+        if (!firstRow) return;
+        const thead = document.createElement('thead');
+        // Convert td to th
+        for (const cell of Array.from(firstRow.children)) {
+          if (cell.tagName === 'TD') {
+            const th = document.createElement('th');
+            th.innerHTML = cell.innerHTML;
+            th.colSpan = cell.colSpan;
+            th.rowSpan = cell.rowSpan;
+            cell.replaceWith(th);
+          }
+        }
+        thead.appendChild(firstRow);
+        activeTable.insertBefore(thead, activeTable.firstChild);
+        showToast('Header added');
+      }
+    });
+
+    // --- Merge cells (simple: toggle colspan on active cell) ---
+    document.getElementById('ttMerge').addEventListener('click', () => {
+      if (!activeCell) return;
+      const currentSpan = activeCell.colSpan || 1;
+      if (currentSpan > 1) {
+        // Split back
+        activeCell.colSpan = 1;
+        const row = activeCell.parentElement;
+        for (let i = 1; i < currentSpan; i++) {
+          const newCell = document.createElement(activeCell.tagName);
+          newCell.innerHTML = '&nbsp;';
+          row.insertBefore(newCell, activeCell.nextSibling);
+        }
+        showToast('Cells split');
+      } else {
+        // Merge with next cell
+        const next = activeCell.nextElementSibling;
+        if (next) {
+          activeCell.colSpan = (activeCell.colSpan || 1) + (next.colSpan || 1);
+          // Append text from next cell if not empty
+          const nextText = next.textContent.trim();
+          if (nextText && nextText !== '\u00a0') {
+            activeCell.innerHTML += ' ' + next.innerHTML;
+          }
+          next.remove();
+          showToast('Cells merged');
+        } else {
+          showToast('No adjacent cell to merge with');
+        }
+      }
+    });
+
+    // --- Delete entire table ---
+    document.getElementById('ttDeleteTable').addEventListener('click', () => {
+      if (!activeTable) return;
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
+      activeTable.replaceWith(p);
+      placeCursorIn(p);
+      activeTable = null;
+      activeCell = null;
+      tableToolbar.classList.remove('visible');
+      highlightCell(null);
+      showToast('Table deleted');
+    });
+
+    // --- Tab navigation between cells ---
+    visualEditor.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        const ctx = getTableContext();
+        if (!ctx || !ctx.td) return;
+        e.preventDefault();
+        const cells = Array.from(ctx.table.querySelectorAll('td, th'));
+        const idx = cells.indexOf(ctx.td);
+        let target;
+        if (e.shiftKey) {
+          target = cells[idx - 1] || cells[cells.length - 1];
+        } else {
+          if (idx === cells.length - 1) {
+            // Last cell: insert a new row and go to first cell
+            const lastRow = ctx.table.querySelector('tbody tr:last-child') || ctx.table.querySelector('tr:last-child');
+            if (lastRow) {
+              const cols = lastRow.children.length;
+              const newRow = document.createElement('tr');
+              for (let i = 0; i < cols; i++) {
+                const td = document.createElement('td');
+                td.innerHTML = '&nbsp;';
+                newRow.appendChild(td);
+              }
+              lastRow.parentElement.appendChild(newRow);
+              target = newRow.querySelector('td');
+            }
+          } else {
+            target = cells[idx + 1];
+          }
+        }
+        if (target) {
+          placeCursorIn(target);
+          setTimeout(checkTableContext, 10);
+        }
+      }
+      // Enter inside a table cell: prevent new <p>, just add <br>
+      if (e.key === 'Enter') {
+        const ctx = getTableContext();
+        if (ctx && ctx.td) {
+          e.preventDefault();
+          document.execCommand('insertLineBreak');
+        }
+      }
+    });
+
+    // --- Column resize by dragging ---
+    let colResizeState = null;
+
+    visualEditor.addEventListener('mousemove', (e) => {
+      if (colResizeState) {
+        e.preventDefault();
+        const { th, startX, startW } = colResizeState;
+        const dx = e.clientX - startX;
+        th.style.width = Math.max(40, startW + dx) + 'px';
+        return;
+      }
+      // Show resize cursor near cell borders
+      const target = e.target;
+      if ((target.tagName === 'TD' || target.tagName === 'TH') && target.closest('#visual-editor')) {
+        const rect = target.getBoundingClientRect();
+        const nearRight = e.clientX > rect.right - 4;
+        target.style.cursor = nearRight ? 'col-resize' : '';
+      }
+    });
+
+    visualEditor.addEventListener('mousedown', (e) => {
+      const target = e.target;
+      if ((target.tagName === 'TD' || target.tagName === 'TH') && target.closest('#visual-editor')) {
+        const rect = target.getBoundingClientRect();
+        if (e.clientX > rect.right - 4) {
+          e.preventDefault();
+          colResizeState = { th: target, startX: e.clientX, startW: target.offsetWidth };
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (colResizeState) { colResizeState = null; }
+    });
+
+    // Helper: place cursor in a cell
+    function placeCursorIn(el) {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.focus();
+    }
+
+    // ===========================
     //  EMOJI PICKER
     // ===========================
     const EMOJIS = {
@@ -1099,6 +1625,10 @@
         el.style.outline = '';
         el.style.outlineOffset = '';
       });
+      // Clean up table editing artifacts
+      temp.querySelectorAll('.cell-active').forEach(el => el.classList.remove('cell-active'));
+      temp.querySelectorAll('.row-active').forEach(el => el.classList.remove('row-active'));
+      temp.querySelectorAll('.col-resize-handle').forEach(h => h.remove());
       return temp.innerHTML;
     }
 
