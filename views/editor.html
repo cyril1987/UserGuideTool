@@ -383,6 +383,82 @@
     }
 
     /* ===========================
+       BLOCK ACTION TOOLBAR
+       =========================== */
+    #blockToolbar {
+      position: fixed;
+      z-index: 1500;
+      display: none;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      padding: 4px 6px;
+      gap: 2px;
+      align-items: center;
+    }
+    #blockToolbar.visible {
+      display: flex;
+    }
+    .bt-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border: none;
+      background: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: var(--gray-600);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 7px;
+      white-space: nowrap;
+      transition: all 0.1s;
+    }
+    .bt-btn:hover {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+    .bt-btn.danger:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .bt-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .bt-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--gray-200);
+      margin: 0 2px;
+    }
+    #blockToolbar .bt-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0 4px 0 2px;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Selected block element styling */
+    #visual-editor .block-selected {
+      outline: 2px solid #2563eb !important;
+      outline-offset: 3px !important;
+      border-radius: 4px;
+    }
+
+    /* ===========================
        TABLE EDITING TOOLBAR
        =========================== */
     #tableToolbar {
@@ -601,6 +677,35 @@
 
     <!-- HTML Source Editor -->
     <textarea id="source-editor" spellcheck="false"></textarea>
+  </div>
+
+  <!-- Block Action Toolbar (floating) -->
+  <div id="blockToolbar">
+    <span class="bt-label" id="btLabel">Block</span>
+    <button class="bt-btn" id="btMoveUp" title="Move up">
+      <svg viewBox="0 0 24 24"><path d="M12 19V5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
+    <button class="bt-btn" id="btMoveDown" title="Move down">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14"/><polyline points="19 12 12 19 5 12"/></svg>
+    </button>
+    <div class="bt-sep"></div>
+    <button class="bt-btn" id="btCopy" title="Copy (Ctrl+C)">
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copy
+    </button>
+    <button class="bt-btn" id="btCut" title="Cut (Ctrl+X)">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+      Cut
+    </button>
+    <button class="bt-btn" id="btDuplicate" title="Duplicate">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16V4a2 2 0 012-2h12"/></svg>
+      Duplicate
+    </button>
+    <div class="bt-sep"></div>
+    <button class="bt-btn danger" id="btDelete" title="Delete (Backspace)">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      Delete
+    </button>
   </div>
 
   <!-- Table Editing Toolbar (floating) -->
@@ -1032,46 +1137,273 @@
     visualEditor.addEventListener('dragover', (e) => e.preventDefault());
 
     // ===========================
-    //  RESIZE: cards, tables, images
+    //  BLOCK SELECTION & ACTIONS
     // ===========================
-    let resizeState = null;
+    const blockToolbar = document.getElementById('blockToolbar');
+    const btLabel = document.getElementById('btLabel');
+    let selectedBlock = null;
+    let clipboardBlock = null; // for block copy/cut
 
-    function getResizableEl(target) {
-      // Walk up from target to find a resizable element
+    // Block types we can select
+    const BLOCK_SELECTORS = ['TABLE', 'IMG'];
+    const BLOCK_CLASSES = ['card', 'callout', 'concept-box', 'overview-panel',
+      'flow-diagram', 'steps', 'faq', 'section-heading', 'sub-heading', 'sub2-heading'];
+
+    function getBlockEl(target) {
       let el = target;
       while (el && el !== visualEditor) {
-        const tag = el.tagName;
-        if (tag === 'TABLE' || tag === 'IMG' ||
-            (el.classList && (el.classList.contains('card') || el.classList.contains('callout') ||
-             el.classList.contains('concept-box') || el.classList.contains('overview-panel')))) {
-          return el;
+        if (el.nodeType === 1) {
+          if (BLOCK_SELECTORS.includes(el.tagName)) return el;
+          if (el.classList && BLOCK_CLASSES.some(c => el.classList.contains(c))) return el;
         }
         el = el.parentElement;
       }
       return null;
     }
 
-    // Click to select resizable element
-    visualEditor.addEventListener('click', (e) => {
-      // Deselect all
-      visualEditor.querySelectorAll('.editor-selected').forEach(el => {
-        el.classList.remove('editor-selected');
-        el.style.outline = '';
-        el.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
-      });
+    function getBlockLabel(el) {
+      if (el.tagName === 'TABLE') return 'Table';
+      if (el.tagName === 'IMG') return 'Image';
+      if (el.classList.contains('card')) return 'Card';
+      if (el.classList.contains('callout')) return 'Callout';
+      if (el.classList.contains('concept-box')) return 'Concept';
+      if (el.classList.contains('overview-panel')) return 'Overview';
+      if (el.classList.contains('flow-diagram')) return 'Flow';
+      if (el.classList.contains('steps')) return 'Steps';
+      if (el.classList.contains('faq')) return 'FAQ';
+      if (el.classList.contains('section-heading')) return 'Heading';
+      if (el.classList.contains('sub-heading')) return 'Sub-heading';
+      if (el.classList.contains('sub2-heading')) return 'Sub-heading';
+      return 'Block';
+    }
 
-      const resizable = getResizableEl(e.target);
-      if (resizable) {
-        resizable.classList.add('editor-selected');
-        resizable.style.outline = '2px solid #2563eb';
-        resizable.style.outlineOffset = '3px';
-        resizable.style.borderRadius = '4px';
-        // Add resize handles
-        addResizeHandles(resizable);
+    function deselectBlock() {
+      if (selectedBlock) {
+        selectedBlock.classList.remove('block-selected');
+        selectedBlock.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+        selectedBlock = null;
+      }
+      blockToolbar.classList.remove('visible');
+    }
+
+    function selectBlock(el) {
+      deselectBlock();
+      selectedBlock = el;
+      el.classList.add('block-selected');
+      btLabel.textContent = getBlockLabel(el);
+      addResizeHandle(el);
+      positionBlockToolbar();
+    }
+
+    function positionBlockToolbar() {
+      if (!selectedBlock) return;
+      const rect = selectedBlock.getBoundingClientRect();
+      const tbW = blockToolbar.offsetWidth || 420;
+      let left = rect.left + (rect.width - tbW) / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tbW - 8));
+      let top = rect.top - 42;
+      if (top < 60) top = rect.bottom + 6; // below if near top
+      blockToolbar.style.left = left + 'px';
+      blockToolbar.style.top = top + 'px';
+      blockToolbar.classList.add('visible');
+    }
+
+    // Click handler: select block on click
+    visualEditor.addEventListener('click', (e) => {
+      // Don't interfere with resize handles
+      if (e.target.classList && e.target.classList.contains('resize-handle-el')) return;
+
+      const block = getBlockEl(e.target);
+      if (block) {
+        selectBlock(block);
+      } else {
+        deselectBlock();
       }
     });
 
-    function addResizeHandles(el) {
+    // Reposition on scroll
+    visualEditor.addEventListener('scroll', () => {
+      if (selectedBlock) positionBlockToolbar();
+    });
+
+    // --- Block toolbar actions ---
+
+    // Delete
+    document.getElementById('btDelete').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      snapshotBeforeAction();
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
+      selectedBlock.replaceWith(p);
+      placeCursorIn(p);
+      deselectBlock();
+      showToast('Block deleted');
+      snapshotAfterAction();
+    });
+
+    // Duplicate
+    document.getElementById('btDuplicate').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      snapshotBeforeAction();
+      const clone = selectedBlock.cloneNode(true);
+      clone.classList.remove('block-selected');
+      clone.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+      selectedBlock.parentElement.insertBefore(clone, selectedBlock.nextSibling);
+      selectBlock(clone);
+      showToast('Block duplicated');
+      snapshotAfterAction();
+    });
+
+    // Copy
+    document.getElementById('btCopy').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      const clone = selectedBlock.cloneNode(true);
+      clone.classList.remove('block-selected');
+      clone.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+      clipboardBlock = clone;
+      // Also copy to system clipboard as HTML
+      const html = clone.outerHTML;
+      navigator.clipboard.write([
+        new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }) })
+      ]).catch(() => {});
+      showToast('Block copied');
+    });
+
+    // Cut
+    document.getElementById('btCut').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      snapshotBeforeAction();
+      const clone = selectedBlock.cloneNode(true);
+      clone.classList.remove('block-selected');
+      clone.querySelectorAll('.resize-handle-el').forEach(h => h.remove());
+      clipboardBlock = clone;
+      // Copy to system clipboard
+      const html = clone.outerHTML;
+      navigator.clipboard.write([
+        new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }) })
+      ]).catch(() => {});
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
+      selectedBlock.replaceWith(p);
+      placeCursorIn(p);
+      deselectBlock();
+      showToast('Block cut');
+      snapshotAfterAction();
+    });
+
+    // Move Up
+    document.getElementById('btMoveUp').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      const prev = selectedBlock.previousElementSibling;
+      if (!prev) { showToast('Already at the top'); return; }
+      snapshotBeforeAction();
+      selectedBlock.parentElement.insertBefore(selectedBlock, prev);
+      positionBlockToolbar();
+      showToast('Moved up');
+      snapshotAfterAction();
+    });
+
+    // Move Down
+    document.getElementById('btMoveDown').addEventListener('click', () => {
+      if (!selectedBlock) return;
+      const next = selectedBlock.nextElementSibling;
+      if (!next) { showToast('Already at the bottom'); return; }
+      snapshotBeforeAction();
+      selectedBlock.parentElement.insertBefore(next, selectedBlock);
+      positionBlockToolbar();
+      showToast('Moved down');
+      snapshotAfterAction();
+    });
+
+    // --- Keyboard shortcuts for selected block ---
+    visualEditor.addEventListener('keydown', (e) => {
+      if (!selectedBlock) return;
+
+      // Delete / Backspace: remove selected block
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Only if the selection is not inside a text editing context
+        const sel = window.getSelection();
+        const isEditingText = sel.anchorNode && sel.anchorNode.nodeType === 3 &&
+          sel.toString().length === 0 && sel.anchorNode.textContent.length > 0;
+        // Check if cursor is in a text node with content — let normal editing happen
+        if (isEditingText) return;
+
+        e.preventDefault();
+        snapshotBeforeAction();
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+        selectedBlock.replaceWith(p);
+        placeCursorIn(p);
+        deselectBlock();
+        showToast('Block deleted');
+        snapshotAfterAction();
+      }
+
+      // Ctrl+C: copy block
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const sel = window.getSelection();
+        // If user has text selected, let normal copy work
+        if (sel.toString().length > 0) return;
+        e.preventDefault();
+        document.getElementById('btCopy').click();
+      }
+
+      // Ctrl+X: cut block
+      if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
+        const sel = window.getSelection();
+        if (sel.toString().length > 0) return;
+        e.preventDefault();
+        document.getElementById('btCut').click();
+      }
+    });
+
+    // Ctrl+V: paste copied block
+    visualEditor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v' && clipboardBlock) {
+        // Only paste as block if we have a block in our clipboard
+        // and no text is selected (let normal paste work otherwise)
+        const sel = window.getSelection();
+        if (sel.toString().length > 0) return;
+
+        e.preventDefault();
+        snapshotBeforeAction();
+        const clone = clipboardBlock.cloneNode(true);
+        // Insert after selected block or at cursor position
+        if (selectedBlock) {
+          selectedBlock.parentElement.insertBefore(clone, selectedBlock.nextSibling);
+        } else {
+          // Insert at cursor
+          if (sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+            // Find the block-level parent
+            let container = range.startContainer;
+            while (container && container !== visualEditor && container.parentElement !== visualEditor) {
+              container = container.parentElement;
+            }
+            if (container && container !== visualEditor) {
+              container.parentElement.insertBefore(clone, container.nextSibling);
+            } else {
+              visualEditor.appendChild(clone);
+            }
+          } else {
+            visualEditor.appendChild(clone);
+          }
+        }
+        selectBlock(clone);
+        showToast('Block pasted');
+        snapshotAfterAction();
+      }
+    });
+
+    // ===========================
+    //  RESIZE HANDLES
+    // ===========================
+    let resizeState = null;
+
+    function addResizeHandle(el) {
+      // Don't add if already has one
+      if (el.querySelector('.resize-handle-el')) return;
+
       const handle = document.createElement('div');
       handle.className = 'resize-handle-el';
       handle.contentEditable = 'false';
@@ -1089,7 +1421,6 @@
         boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
       });
 
-      // Make the element positioned if not already
       if (getComputedStyle(el).position === 'static') {
         el.style.position = 'relative';
       }
@@ -1098,12 +1429,13 @@
         e.preventDefault();
         e.stopPropagation();
         snapshotBeforeAction();
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startW = el.offsetWidth;
-        const startH = el.offsetHeight;
-
-        resizeState = { el, startX, startY, startW, startH };
+        resizeState = {
+          el,
+          startX: e.clientX,
+          startY: e.clientY,
+          startW: el.offsetWidth,
+          startH: el.offsetHeight
+        };
       });
 
       el.appendChild(handle);
@@ -1119,7 +1451,6 @@
       const newH = Math.max(40, startH + dy);
 
       if (el.tagName === 'IMG') {
-        // Maintain aspect ratio for images
         const ratio = startW / startH;
         el.style.width = newW + 'px';
         el.style.height = Math.round(newW / ratio) + 'px';
@@ -1775,6 +2106,8 @@
         el.style.outline = '';
         el.style.outlineOffset = '';
       });
+      // Clean up block selection artifacts
+      temp.querySelectorAll('.block-selected').forEach(el => el.classList.remove('block-selected'));
       // Clean up table editing artifacts
       temp.querySelectorAll('.cell-active').forEach(el => el.classList.remove('cell-active'));
       temp.querySelectorAll('.row-active').forEach(el => el.classList.remove('row-active'));
