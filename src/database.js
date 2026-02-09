@@ -41,6 +41,10 @@ function initialize() {
     );
   `);
 
+  // Add parent_id and sort_order columns if they don't exist
+  try { db.exec('ALTER TABLE guides ADD COLUMN parent_id INTEGER DEFAULT NULL'); } catch(e) {}
+  try { db.exec('ALTER TABLE guides ADD COLUMN sort_order INTEGER DEFAULT 0'); } catch(e) {}
+
   // Set default admin password if not exists (default: "admin123")
   const existing = db.prepare('SELECT value FROM config WHERE key = ?').get('admin_password');
   if (!existing) {
@@ -138,6 +142,16 @@ function getVersion(versionId) {
   return getDb().prepare('SELECT * FROM guide_versions WHERE id = ?').get(versionId);
 }
 
+// --- Guide tree ---
+
+function getGuideTree() {
+  return getDb().prepare('SELECT id, title, slug, parent_id, sort_order, updated_at FROM guides ORDER BY sort_order ASC, updated_at DESC').all();
+}
+
+function updateGuideParent(slug, parentId) {
+  return getDb().prepare('UPDATE guides SET parent_id = ? WHERE slug = ?').run(parentId || null, slug);
+}
+
 module.exports = {
   getDb,
   getAllGuides,
@@ -153,4 +167,6 @@ module.exports = {
   saveVersion,
   getVersions,
   getVersion,
+  getGuideTree,
+  updateGuideParent,
 };

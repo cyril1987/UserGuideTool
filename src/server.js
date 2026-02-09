@@ -3,6 +3,8 @@ const session = require('express-session');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
+const http = require('http');
+const https = require('https');
 const db = require('./database');
 const search = require('./search');
 
@@ -298,6 +300,50 @@ app.get('/guide/:slug/print', (req, res) => {
 app.post('/admin/upload', requireAuth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+// Link preview API (fetches URL metadata)
+app.get('/api/link-preview', requireAuth, (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.json({ error: 'URL required' });
+  let parsedUrl;
+  try { parsedUrl = new URL(url); } catch(e) { return res.json({ error: 'Invalid URL' }); }
+
+  const proto = parsedUrl.protocol === 'https:' ? https : http;
+  const request = proto.get(url, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0 LinkPreview' } }, (response) => {
+    if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+      return res.json({ error: 'redirect', location: response.headers.location });
+    }
+    let data = '';
+    response.on('data', chunk => { data += chunk; if (data.length > 100000) response.destroy(); });
+    response.on('end', () => {
+      const title = (data.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '';
+      const desc = (data.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i) ||
+                    data.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["']/i) ||
+                    data.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i) || [])[1] || '';
+      let favicon = (data.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']*)["']/i) || [])[1] || '';
+      if (favicon && !favicon.startsWith('http')) {
+        favicon = favicon.startsWith('/') ? parsedUrl.origin + favicon : parsedUrl.origin + '/' + favicon;
+      }
+      if (!favicon) favicon = parsedUrl.origin + '/favicon.ico';
+      res.json({ title: title.replace(/<[^>]*>/g, '').trim(), description: desc.trim(), favicon, domain: parsedUrl.hostname });
+    });
+  });
+  request.on('error', () => res.json({ error: 'Could not fetch URL' }));
+  request.on('timeout', () => { request.destroy(); res.json({ error: 'Timed out' }); });
+});
+
+// Guide tree API
+app.get('/api/guide-tree', (req, res) => {
+  const guides = db.getGuideTree();
+  res.json({ guides });
+});
+
+// Update guide parent
+app.post('/admin/guide/:slug/parent', requireAuth, (req, res) => {
+  const { parentId } = req.body;
+  db.updateGuideParent(req.params.slug, parentId);
+  res.json({ success: true });
 });
 
 // =====================

@@ -1243,6 +1243,153 @@
     .template-card-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
     .template-card-desc { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
 
+    /* ===========================
+       PHASE 5: TABBED CONTENT
+       =========================== */
+    .tab-container {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .tab-headers {
+      display: flex;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+    }
+    .tab-header {
+      padding: 8px 20px;
+      border: none;
+      background: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tab-header:hover { color: var(--gray-700); background: var(--gray-100); }
+    .tab-header.active { color: var(--primary); border-bottom-color: var(--primary); background: white; }
+    .tab-panel { display: none; padding: 16px; min-height: 60px; }
+    .tab-panel.active { display: block; }
+    #visual-editor .tab-header.add-tab-btn { color: var(--gray-400); font-size: 18px; padding: 8px 12px; }
+    #visual-editor .tab-header.add-tab-btn:hover { color: var(--primary); }
+
+    /* ===========================
+       PHASE 5: SMART LINK PREVIEW
+       =========================== */
+    .link-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      text-decoration: none;
+      color: inherit;
+      margin: 8px 0;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+    .link-preview:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(37,99,235,0.1); }
+    .link-preview-favicon { width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0; object-fit: contain; }
+    .link-preview-info { flex: 1; min-width: 0; }
+    .link-preview-title { font-size: 14px; font-weight: 600; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-preview-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .link-preview-url { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+    /* ===========================
+       PHASE 5: DRAG-AND-DROP
+       =========================== */
+    .drag-handle {
+      position: absolute;
+      left: -28px; top: 50%;
+      transform: translateY(-50%);
+      width: 22px; height: 22px;
+      display: none;
+      align-items: center; justify-content: center;
+      cursor: grab; color: var(--gray-400); font-size: 14px;
+      border-radius: 4px; background: white; border: 1px solid var(--gray-200); z-index: 10;
+    }
+    .drag-handle:hover { color: var(--gray-600); background: var(--gray-50); }
+    .drag-handle:active { cursor: grabbing; }
+    #visual-editor > *:hover > .drag-handle { display: flex; }
+    #visual-editor > * { position: relative; }
+    .drag-placeholder {
+      border: 2px dashed var(--primary); border-radius: 4px;
+      background: var(--primary-light); min-height: 4px; margin: 4px 0;
+    }
+
+    /* ===========================
+       PHASE 5: EDITOR TOC PANEL
+       =========================== */
+    .editor-toc-toggle {
+      position: fixed; right: 16px; bottom: 48px;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--gray-300); background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; color: var(--gray-600); font-size: 16px;
+    }
+    .editor-toc-toggle:hover { background: var(--gray-50); color: var(--primary); }
+    .editor-toc-panel {
+      position: fixed; right: -280px; top: 120px; width: 260px;
+      max-height: calc(100vh - 180px); background: white;
+      border: 1px solid var(--gray-200); border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 99;
+      overflow-y: auto; padding: 12px; transition: right 0.25s ease;
+    }
+    .editor-toc-panel.visible { right: 16px; }
+    .editor-toc-panel h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 8px; }
+    .etoc-item {
+      display: block; padding: 4px 8px; font-size: 13px; color: var(--gray-600);
+      cursor: pointer; border-radius: 4px; text-decoration: none;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .etoc-item:hover { background: var(--gray-50); color: var(--primary); }
+    .etoc-item.level-1 { font-weight: 600; }
+    .etoc-item.level-2 { padding-left: 16px; }
+    .etoc-item.level-3 { padding-left: 28px; font-size: 12px; }
+    .etoc-item.level-4 { padding-left: 40px; font-size: 12px; color: var(--gray-400); }
+
+    /* ===========================
+       PHASE 5: INLINE COMMENTS
+       =========================== */
+    .comment-highlight {
+      background: rgba(255, 213, 79, 0.3); border-bottom: 2px solid #ffd54f;
+      cursor: pointer; position: relative;
+    }
+    .comment-highlight:hover { background: rgba(255, 213, 79, 0.5); }
+    .comment-panel {
+      position: fixed; right: -320px; top: 120px; width: 300px;
+      max-height: calc(100vh - 180px); background: white;
+      border: 1px solid var(--gray-200); border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 101;
+      overflow-y: auto; transition: right 0.25s ease;
+    }
+    .comment-panel.visible { right: 16px; }
+    .comment-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--gray-200);
+    }
+    .comment-panel-header h4 { font-size: 14px; margin: 0; color: var(--gray-900); }
+    .comment-item {
+      padding: 12px 16px; border-bottom: 1px solid var(--gray-100);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .comment-item:hover { background: var(--gray-50); }
+    .comment-item-text { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; font-style: italic; }
+    .comment-item-body { font-size: 13px; color: var(--gray-700); }
+    .comment-item-actions { margin-top: 6px; }
+    .comment-item-actions button {
+      font-size: 11px; color: var(--gray-400); background: none; border: none;
+      cursor: pointer; padding: 0; margin-right: 8px;
+    }
+    .comment-item-actions button:hover { color: var(--danger); }
+    .comment-empty { padding: 20px 16px; text-align: center; color: var(--gray-400); font-size: 13px; }
+
     /* HTML Source editor */
     #source-editor {
       display: none;
@@ -1382,8 +1529,10 @@
       <button class="insert-btn" id="insertTaskList" title="Insert task/checklist">&#x2611; Tasks</button>
       <button class="insert-btn" id="insertVideo" title="Embed YouTube/Vimeo video">&#x25B6;&#xFE0F; Video</button>
       <button class="insert-btn" id="insertImage" title="Upload an image">&#x1F4F7; Image</button>
+      <button class="insert-btn" id="insertTabs" title="Insert tabbed content">&#x1F4D1; Tabs</button>
+      <button class="insert-btn" id="insertLinkPreview" title="Insert smart link preview">&#x1F517; Link Card</button>
       <button class="insert-btn" id="insertHR" title="Insert horizontal rule">&#x2015; Divider</button>
-      <button class="insert-btn" id="insertTemplate" title="Load a guide template">&#x1F4D1; Template</button>
+      <button class="insert-btn" id="insertTemplate" title="Load a guide template">&#x1F4CB; Template</button>
     </div>
 
     <!-- Editor mode tabs -->
@@ -1668,6 +1817,60 @@
     </div>
   </div>
 
+  <!-- Editor TOC Panel -->
+  <button class="editor-toc-toggle" id="editorTocToggle" title="Table of Contents">&#x2630;</button>
+  <div class="editor-toc-panel" id="editorTocPanel">
+    <h4>Table of Contents</h4>
+    <div id="editorTocList"></div>
+  </div>
+
+  <!-- Comment Panel -->
+  <div class="comment-panel" id="commentPanel">
+    <div class="comment-panel-header">
+      <h4>Comments</h4>
+      <button class="version-panel-close" id="commentPanelClose">&#x2715;</button>
+    </div>
+    <div id="commentList">
+      <div class="comment-empty">No comments yet. Select text and click the comment button to add one.</div>
+    </div>
+  </div>
+
+  <!-- Link Preview Modal -->
+  <div class="modal-overlay" id="linkPreviewModal">
+    <div class="modal">
+      <h3>Insert Link Card</h3>
+      <div class="form-group">
+        <label for="lpUrl">URL</label>
+        <input type="text" id="lpUrl" placeholder="https://example.com" autocomplete="off">
+      </div>
+      <p id="lpStatus" style="font-size:12px; color:var(--gray-400); margin-top:-4px;"></p>
+      <div id="lpPreview" style="display:none; margin-top:12px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="lpCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="lpInsert" disabled>Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Insert Modal -->
+  <div class="modal-overlay" id="tabModal">
+    <div class="modal">
+      <h3>Insert Tabbed Content</h3>
+      <div class="form-group">
+        <label for="tabCount">Number of tabs</label>
+        <input type="number" id="tabCount" value="3" min="2" max="8">
+      </div>
+      <div class="form-group">
+        <label>Tab labels (comma-separated)</label>
+        <input type="text" id="tabLabels" value="Tab 1, Tab 2, Tab 3" placeholder="Tab 1, Tab 2, Tab 3">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" id="tabCancel">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="tabInsert">Insert</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Version History Panel (slide-in) -->
   <div class="version-overlay" id="versionOverlay"></div>
   <div class="version-panel" id="versionPanel">
@@ -1710,6 +1913,8 @@
       <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
     </button>
     <button class="ft-btn" id="ftCode" title="Inline code" style="font-family:monospace;font-size:12px;">&lt;/&gt;</button>
+    <div class="ft-sep"></div>
+    <button class="ft-btn" id="ftComment" title="Add comment" style="font-size:14px;">&#x1F4AC;</button>
   </div>
 
   <!-- Keyboard Shortcuts Help Panel -->
@@ -3142,6 +3347,18 @@
         const cap = w.querySelector('.img-caption');
         if (cap) cap.removeAttribute('contenteditable');
       });
+      // Clean tab containers editability
+      temp.querySelectorAll('.tab-container').forEach(tc => {
+        tc.removeAttribute('contenteditable');
+        tc.querySelectorAll('.tab-panel').forEach(p => p.removeAttribute('contenteditable'));
+        tc.querySelectorAll('.add-tab-btn').forEach(b => b.remove());
+      });
+      // Clean link preview editability
+      temp.querySelectorAll('.link-preview').forEach(lp => lp.removeAttribute('contenteditable'));
+      // Remove drag handles
+      temp.querySelectorAll('.drag-handle').forEach(h => h.remove());
+      // Remove comment highlights data but keep the highlighting
+      // (comments are preserved as spans with data attributes)
       return temp.innerHTML;
     }
 
@@ -4873,6 +5090,400 @@
       { cat: 'Actions', name: 'Template', desc: 'Load a guide template', icon: '\uD83D\uDCD1', action: () => document.getElementById('insertTemplate').click() },
       { cat: 'Actions', name: 'Duplicate Guide', desc: 'Clone this guide', icon: '\uD83D\uDCCB', action: () => document.getElementById('duplicateBtn').click() },
       { cat: 'Actions', name: 'Version History', desc: 'Browse past versions', icon: '\uD83D\uDD53', action: () => document.getElementById('historyBtn').click() },
+    );
+
+    // ===========================
+    //  PHASE 5: TABBED CONTENT SECTIONS
+    // ===========================
+    document.getElementById('insertTabs').addEventListener('click', () => {
+      document.getElementById('tabModal').classList.add('visible');
+      document.getElementById('tabCount').value = '3';
+      document.getElementById('tabLabels').value = 'Tab 1, Tab 2, Tab 3';
+    });
+    document.getElementById('tabCancel').addEventListener('click', () => {
+      document.getElementById('tabModal').classList.remove('visible');
+    });
+    document.getElementById('tabCount').addEventListener('input', (e) => {
+      const n = parseInt(e.target.value) || 2;
+      const labels = [];
+      for (let i = 1; i <= n; i++) labels.push('Tab ' + i);
+      document.getElementById('tabLabels').value = labels.join(', ');
+    });
+    document.getElementById('tabInsert').addEventListener('click', () => {
+      const labels = document.getElementById('tabLabels').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (labels.length < 2) { showToast('At least 2 tabs required'); return; }
+      snapshotBeforeAction();
+      let headersHtml = labels.map((l, i) =>
+        '<button class="tab-header' + (i === 0 ? ' active' : '') + '" data-tab="' + i + '">' + escapeHtml(l) + '</button>'
+      ).join('');
+      headersHtml += '<button class="tab-header add-tab-btn" title="Add tab">+</button>';
+      let panelsHtml = labels.map((l, i) =>
+        '<div class="tab-panel' + (i === 0 ? ' active' : '') + '" data-tab="' + i + '" contenteditable="true"><p>Content for ' + escapeHtml(l) + '</p></div>'
+      ).join('');
+      const html = '<div class="tab-container" contenteditable="false"><div class="tab-headers">' + headersHtml + '</div>' + panelsHtml + '</div><p><br></p>';
+      insertAtCursor(html);
+      document.getElementById('tabModal').classList.remove('visible');
+      showToast('Tabs inserted');
+      snapshotAfterAction();
+    });
+
+    // Handle tab switching in editor
+    visualEditor.addEventListener('click', (e) => {
+      const tabHeader = e.target.closest('.tab-header');
+      if (!tabHeader) return;
+      const container = tabHeader.closest('.tab-container');
+      if (!container) return;
+      // Add tab button
+      if (tabHeader.classList.contains('add-tab-btn')) {
+        snapshotBeforeAction();
+        const headers = container.querySelectorAll('.tab-header:not(.add-tab-btn)');
+        const newIdx = headers.length;
+        const newHeader = document.createElement('button');
+        newHeader.className = 'tab-header';
+        newHeader.dataset.tab = newIdx;
+        newHeader.textContent = 'Tab ' + (newIdx + 1);
+        tabHeader.before(newHeader);
+        const newPanel = document.createElement('div');
+        newPanel.className = 'tab-panel';
+        newPanel.dataset.tab = newIdx;
+        newPanel.setAttribute('contenteditable', 'true');
+        newPanel.innerHTML = '<p>New tab content</p>';
+        container.appendChild(newPanel);
+        snapshotAfterAction();
+        return;
+      }
+      // Switch tabs
+      const tabIdx = tabHeader.dataset.tab;
+      container.querySelectorAll('.tab-header').forEach(h => h.classList.remove('active'));
+      container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tabHeader.classList.add('active');
+      const panel = container.querySelector('.tab-panel[data-tab="' + tabIdx + '"]');
+      if (panel) panel.classList.add('active');
+    });
+
+    // Allow renaming tab headers on double-click
+    visualEditor.addEventListener('dblclick', (e) => {
+      const tabHeader = e.target.closest('.tab-header:not(.add-tab-btn)');
+      if (!tabHeader) return;
+      e.stopPropagation();
+      const name = prompt('Tab name:', tabHeader.textContent);
+      if (name !== null && name.trim()) {
+        snapshotBeforeAction();
+        tabHeader.textContent = name.trim();
+        snapshotAfterAction();
+      }
+    });
+
+    BLOCK_CLASSES.push('tab-container');
+
+    // ===========================
+    //  PHASE 5: SMART LINK PREVIEWS
+    // ===========================
+    let lpData = null;
+    document.getElementById('insertLinkPreview').addEventListener('click', () => {
+      savedRange = saveSelection();
+      document.getElementById('lpUrl').value = '';
+      document.getElementById('lpPreview').style.display = 'none';
+      document.getElementById('lpPreview').innerHTML = '';
+      document.getElementById('lpStatus').textContent = '';
+      document.getElementById('lpInsert').disabled = true;
+      lpData = null;
+      document.getElementById('linkPreviewModal').classList.add('visible');
+      setTimeout(() => document.getElementById('lpUrl').focus(), 50);
+    });
+    document.getElementById('lpCancel').addEventListener('click', () => {
+      document.getElementById('linkPreviewModal').classList.remove('visible');
+    });
+
+    async function fetchLinkPreview(url) {
+      document.getElementById('lpStatus').textContent = 'Fetching...';
+      document.getElementById('lpInsert').disabled = true;
+      try {
+        const res = await fetch('/api/link-preview?url=' + encodeURIComponent(url));
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById('lpStatus').textContent = 'Could not fetch preview. You can still insert the URL.';
+          lpData = { title: url, description: '', favicon: '', domain: new URL(url).hostname, url };
+        } else {
+          lpData = { ...data, url };
+          document.getElementById('lpStatus').textContent = '';
+        }
+        // Show preview
+        const prev = document.getElementById('lpPreview');
+        prev.innerHTML = '<div class="link-preview" style="cursor:default;">' +
+          (lpData.favicon ? '<img class="link-preview-favicon" src="' + escapeHtml(lpData.favicon) + '" onerror="this.style.display=\'none\'">' : '') +
+          '<div class="link-preview-info"><div class="link-preview-title">' + escapeHtml(lpData.title || url) + '</div>' +
+          (lpData.description ? '<div class="link-preview-desc">' + escapeHtml(lpData.description) + '</div>' : '') +
+          '<div class="link-preview-url">' + escapeHtml(lpData.domain || url) + '</div></div></div>';
+        prev.style.display = 'block';
+        document.getElementById('lpInsert').disabled = false;
+      } catch(err) {
+        document.getElementById('lpStatus').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    document.getElementById('lpUrl').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const url = document.getElementById('lpUrl').value.trim();
+        if (url) fetchLinkPreview(url);
+      }
+    });
+
+    document.getElementById('lpInsert').addEventListener('click', () => {
+      if (!lpData) return;
+      snapshotBeforeAction();
+      restoreSelection(savedRange);
+      const html = '<a class="link-preview" href="' + escapeHtml(lpData.url) + '" target="_blank" contenteditable="false">' +
+        (lpData.favicon ? '<img class="link-preview-favicon" src="' + escapeHtml(lpData.favicon) + '" onerror="this.style.display=\'none\'">' : '') +
+        '<div class="link-preview-info"><div class="link-preview-title">' + escapeHtml(lpData.title || lpData.url) + '</div>' +
+        (lpData.description ? '<div class="link-preview-desc">' + escapeHtml(lpData.description) + '</div>' : '') +
+        '<div class="link-preview-url">' + escapeHtml(lpData.domain) + '</div></div></a><p><br></p>';
+      insertAtCursor(html);
+      savedRange = null;
+      document.getElementById('linkPreviewModal').classList.remove('visible');
+      showToast('Link card inserted');
+      snapshotAfterAction();
+    });
+
+    BLOCK_CLASSES.push('link-preview');
+
+    // ===========================
+    //  PHASE 5: DRAG-AND-DROP BLOCK REORDER
+    // ===========================
+    let draggedBlock = null;
+    let dragPlaceholder = null;
+
+    function addDragHandles() {
+      visualEditor.querySelectorAll(':scope > *').forEach(child => {
+        if (child.querySelector('.drag-handle') || child.classList.contains('drag-placeholder')) return;
+        if (child.tagName === 'BR') return;
+        const handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '\u2801\u2801';
+        handle.setAttribute('draggable', 'true');
+        handle.setAttribute('contenteditable', 'false');
+        handle.addEventListener('dragstart', (e) => {
+          draggedBlock = child;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', '');
+          child.style.opacity = '0.4';
+          dragPlaceholder = document.createElement('div');
+          dragPlaceholder.className = 'drag-placeholder';
+        });
+        handle.addEventListener('dragend', () => {
+          if (draggedBlock) draggedBlock.style.opacity = '';
+          if (dragPlaceholder && dragPlaceholder.parentNode) dragPlaceholder.remove();
+          draggedBlock = null;
+          dragPlaceholder = null;
+        });
+        child.appendChild(handle);
+      });
+    }
+
+    visualEditor.addEventListener('dragover', (e) => {
+      if (!draggedBlock) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const target = getDropTarget(e.clientY);
+      if (target && target !== draggedBlock && target !== dragPlaceholder) {
+        const rect = target.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) {
+          target.before(dragPlaceholder);
+        } else {
+          target.after(dragPlaceholder);
+        }
+      }
+    });
+
+    visualEditor.addEventListener('drop', (e) => {
+      if (!draggedBlock || !dragPlaceholder) return;
+      e.preventDefault();
+      snapshotBeforeAction();
+      dragPlaceholder.replaceWith(draggedBlock);
+      draggedBlock.style.opacity = '';
+      draggedBlock = null;
+      dragPlaceholder = null;
+      addDragHandles();
+      snapshotAfterAction();
+    });
+
+    function getDropTarget(y) {
+      const children = [...visualEditor.children];
+      for (const child of children) {
+        if (child === dragPlaceholder || child === draggedBlock) continue;
+        const rect = child.getBoundingClientRect();
+        if (y >= rect.top && y <= rect.bottom) return child;
+      }
+      return children[children.length - 1];
+    }
+
+    // Add handles initially and on content changes
+    addDragHandles();
+    const dragObserver = new MutationObserver(() => { setTimeout(addDragHandles, 50); });
+    dragObserver.observe(visualEditor, { childList: true });
+
+    // ===========================
+    //  PHASE 5: TABLE OF CONTENTS IN EDITOR
+    // ===========================
+    const editorTocPanel = document.getElementById('editorTocPanel');
+    const editorTocList = document.getElementById('editorTocList');
+    let editorTocVisible = false;
+
+    document.getElementById('editorTocToggle').addEventListener('click', () => {
+      editorTocVisible = !editorTocVisible;
+      editorTocPanel.classList.toggle('visible', editorTocVisible);
+      if (editorTocVisible) buildEditorToc();
+    });
+
+    function buildEditorToc() {
+      const headings = visualEditor.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      if (headings.length === 0) {
+        editorTocList.innerHTML = '<div style="color:var(--gray-400);font-size:12px;padding:8px;">No headings found.</div>';
+        return;
+      }
+      editorTocList.innerHTML = '';
+      headings.forEach((h, i) => {
+        const level = parseInt(h.tagName.charAt(1));
+        const item = document.createElement('div');
+        item.className = 'etoc-item level-' + Math.min(level, 4);
+        item.textContent = h.textContent || '(empty heading)';
+        item.addEventListener('click', () => {
+          h.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Flash highlight
+          h.style.background = '#fef3c7';
+          setTimeout(() => { h.style.background = ''; }, 1500);
+        });
+        editorTocList.appendChild(item);
+      });
+    }
+
+    // Auto-update TOC
+    let tocUpdateTimer = null;
+    visualEditor.addEventListener('input', () => {
+      if (!editorTocVisible) return;
+      clearTimeout(tocUpdateTimer);
+      tocUpdateTimer = setTimeout(buildEditorToc, 500);
+    });
+
+    // ===========================
+    //  PHASE 5: INLINE COMMENTS / ANNOTATIONS
+    // ===========================
+    const commentPanel = document.getElementById('commentPanel');
+    const commentList = document.getElementById('commentList');
+    let commentCounter = Date.now();
+
+    document.getElementById('ftComment').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      addComment();
+    });
+
+    document.getElementById('commentPanelClose').addEventListener('click', () => {
+      commentPanel.classList.remove('visible');
+    });
+
+    function addComment() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) {
+        showToast('Select some text first');
+        return;
+      }
+      const text = prompt('Add a comment:');
+      if (!text) return;
+      snapshotBeforeAction();
+      const range = sel.getRangeAt(0);
+      const commentId = 'c' + (commentCounter++);
+      const span = document.createElement('span');
+      span.className = 'comment-highlight';
+      span.dataset.commentId = commentId;
+      span.dataset.comment = text;
+      range.surroundContents(span);
+      sel.removeAllRanges();
+      snapshotAfterAction();
+      showCommentPanel();
+      showToast('Comment added');
+    }
+
+    function showCommentPanel() {
+      commentPanel.classList.add('visible');
+      refreshComments();
+    }
+
+    function refreshComments() {
+      const highlights = visualEditor.querySelectorAll('.comment-highlight');
+      if (highlights.length === 0) {
+        commentList.innerHTML = '<div class="comment-empty">No comments yet. Select text and click the comment button to add one.</div>';
+        return;
+      }
+      commentList.innerHTML = '';
+      highlights.forEach(h => {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+        item.innerHTML = '<div class="comment-item-text">"' + escapeHtml(h.textContent.substring(0, 60)) + (h.textContent.length > 60 ? '...' : '') + '"</div>' +
+          '<div class="comment-item-body">' + escapeHtml(h.dataset.comment) + '</div>' +
+          '<div class="comment-item-actions"><button data-cid="' + h.dataset.commentId + '">Delete</button></div>';
+        item.addEventListener('click', (e) => {
+          if (e.target.tagName === 'BUTTON') return;
+          h.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          h.style.background = 'rgba(255,213,79,0.6)';
+          setTimeout(() => { h.style.background = ''; }, 1500);
+        });
+        item.querySelector('button').addEventListener('click', () => {
+          snapshotBeforeAction();
+          const text = document.createTextNode(h.textContent);
+          h.replaceWith(text);
+          visualEditor.normalize();
+          refreshComments();
+          snapshotAfterAction();
+        });
+        commentList.appendChild(item);
+      });
+    }
+
+    // Click on comment highlight to show panel
+    visualEditor.addEventListener('click', (e) => {
+      if (e.target.closest('.comment-highlight')) {
+        showCommentPanel();
+      }
+    });
+
+    // ===========================
+    //  PHASE 5: MULTI-GUIDE PAGE TREE (parent selector in editor)
+    // ===========================
+    if (!isNew && currentSlug) {
+      // Add parent selector to the editor toolbar
+      fetch('/api/guide-tree').then(r => r.json()).then(data => {
+        if (!data.guides || data.guides.length < 2) return;
+        const current = data.guides.find(g => g.slug === currentSlug);
+        const parentGroup = document.createElement('div');
+        parentGroup.className = 'fmt-group parent-guide-group';
+        parentGroup.innerHTML = '<label>Parent:</label><select class="parent-guide-select" id="parentGuideSelect">' +
+          '<option value="">(None - top level)</option>' +
+          data.guides.filter(g => g.slug !== currentSlug).map(g =>
+            '<option value="' + g.id + '"' + (current && current.parent_id === g.id ? ' selected' : '') + '>' + escapeHtml(g.title) + '</option>'
+          ).join('') + '</select>';
+        formatToolbar.appendChild(parentGroup);
+        document.getElementById('parentGuideSelect').addEventListener('change', async (e) => {
+          const parentId = e.target.value || null;
+          await fetch('/admin/guide/' + currentSlug + '/parent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentId })
+          });
+          showToast('Parent guide updated');
+        });
+      });
+    }
+
+    // ===========================
+    //  PHASE 5: ADD TO SLASH COMMANDS
+    // ===========================
+    SLASH_COMMANDS.push(
+      { cat: 'Blocks', name: 'Tabs', desc: 'Tabbed content sections', icon: '\uD83D\uDCD1', action: () => document.getElementById('insertTabs').click() },
+      { cat: 'Blocks', name: 'Link Card', desc: 'Smart link preview', icon: '\uD83D\uDD17', action: () => document.getElementById('insertLinkPreview').click() },
+      { cat: 'Actions', name: 'Comments', desc: 'View all comments', icon: '\uD83D\uDCAC', action: () => showCommentPanel() },
+      { cat: 'Actions', name: 'Table of Contents', desc: 'Toggle editor TOC', icon: '\u2630', action: () => document.getElementById('editorTocToggle').click() },
     );
   </script>
 </body>
